@@ -1,5 +1,6 @@
 using Microsoft.VisualBasic.Logging;
 using System;
+using System.Globalization;
 using System.IO.Ports;
 using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -12,6 +13,7 @@ namespace ArduinoGraphViewer
 
         private bool _bInitBusy = true;
 
+        private StringBuilder _serialBuffer = new StringBuilder();
         private SerialPort _arduino;
 
         private bool _continue;
@@ -342,6 +344,7 @@ namespace ArduinoGraphViewer
                 AddConsoleOut(" ", true);
                 AddConsoleOut("help - Show this help message", true);
                 AddConsoleOut("clear - Clear the console output", true);
+                AddConsoleOut("example - outputs an example arduino project", true);
                 AddConsoleOut("<command> - execute a specific command on the Arduino", true);
                 AddConsoleOut(" ", true);
                 AddConsoleOut("Possible replies:", true);
@@ -373,6 +376,71 @@ namespace ArduinoGraphViewer
                         case "clear":
                             TXTConsoleOut.Clear();
                             break;
+                        case "example":
+                            AddConsoleOut("Example Arduino code:", true);
+                            AddConsoleOut("---------------------", true);
+                            AddConsoleOut(@"
+
+String inputBuffer = """";
+bool commandInProgress = false;
+bool start = false;
+unsigned long long prevTime;
+unsigned long long currentTime;
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial); // Wait for serial connection (optional for Leonardo/Micro)
+  Serial.println(""Arduino ready."");
+}
+
+void loop() {
+  //timer
+  currentTime = micros();
+  
+  // Read incoming characters
+  if(Serial.available() > 0) {
+    char c = Serial.read();
+
+    if (c == '\n' || c == '\r') {
+      if (inputBuffer.length() > 0) {
+        handleCommand(inputBuffer);
+        inputBuffer = """";
+      }
+    } else {
+      inputBuffer += c;
+    }
+  }
+
+  //process
+  if(start)
+  {
+    if(currentTime-prevTime > 1000000)
+    {
+      //update time
+      prevTime = currentTime;
+      float temp = analogRead(A0) * (5.0 / 1023.0) * 100; // Example conversion
+      Serial.println(""#temp|"" + String(temp, 2));
+    }  
+  }
+}
+
+void handleCommand(String cmd) {
+  cmd.trim(); // Remove whitespace
+  Serial.println(""!"" + cmd +""|success|ack"");
+  // Command logic
+  if (cmd == ""start"") {
+    Serial.println(""!start|success|started"");
+    start = true;
+  } else if (cmd == ""stop"") {
+        Serial.println(""!stop|success|stopped"");
+        start = false;
+  } else {
+    Serial.println(""!unknown command|fail|not a valid command"");
+  }
+}
+
+", true);
+                            break;
                         default:
                             if (_arduino != null && _arduino.IsOpen)
                             {
@@ -398,6 +466,182 @@ namespace ArduinoGraphViewer
                 AddOutputLog($"{ex.Message}", LogType.Error);
             }
 
+        }
+
+        #endregion
+
+        #region ARDUINO
+
+        private void HandleReceivedSerialData(string data)
+        {
+            try
+            {
+                // Process data here
+                if (!string.IsNullOrEmpty(data) && data.Length > 0)
+                {
+                    string[] parts;
+                    switch (data[0])
+                    {
+                        case '#':
+
+                            //handle data points for the graph
+                            //----------------------------------------
+                            parts = data.Substring(1).Split('|');
+                            string seriesName;
+                            switch (parts.Length)
+                            {
+                                case 0:
+                                    AddOutputLog($"No data received after #", LogType.Warning);
+                                    return;
+                                case 1:
+                                    AddOutputLog($"Not enough data received after #, it should be: #<seriesname>|<value> or #<seriesname>|<datetime>|<value> or #<seriesname>|<value>|<value>", LogType.Warning);
+                                    return;
+                                case 2:
+                                    //correct format
+                                    seriesName = parts[0];
+                                    if (_chart.Series.FindByName(seriesName) != null)
+                                    {
+                                        if (rbTimeSeries.Checked)
+                                        {
+                                            if (double.TryParse(parts[1], CultureInfo.InvariantCulture, out double value))
+                                            {
+                                                AddTimeSeriesPoint(seriesName, DateTime.Now, value);
+                                            }
+                                            else
+                                            {
+                                                AddOutputLog($"Value is not a valid number: '{parts[1]}'", LogType.Warning);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            AddOutputLog($"Not enough data received after #, it should be: #<seriesname>|<value>|<value>", LogType.Warning);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Received data for unknown series '{seriesName}'", LogType.Warning);
+                                    }
+                                    break;
+                                case 3:
+                                    //correct format
+                                    seriesName = parts[0];
+                                    if (_chart.Series.FindByName(seriesName) != null)
+                                    {
+                                        if (rbTimeSeries.Checked)
+                                        {
+                                            if (DateTime.TryParse(parts[1], CultureInfo.InvariantCulture, out DateTime time) && double.TryParse(parts[2], CultureInfo.InvariantCulture, out double value))
+                                            {
+                                                AddTimeSeriesPoint(seriesName, time, value);
+                                            }
+                                            else
+                                            {
+                                                AddOutputLog($"DateTime is not valid: '{parts[1]}' or Value is not a valid number: '{parts[2]}'", LogType.Warning);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (double.TryParse(parts[1], CultureInfo.InvariantCulture, out double x) && double.TryParse(parts[2], CultureInfo.InvariantCulture, out double y))
+                                            {
+                                                AddXYPoint(seriesName, x, y);
+                                            }
+                                            else
+                                            {
+                                                AddOutputLog($"X is not a valid number: '{parts[1]}' or Y is not a valid number: '{parts[2]}'", LogType.Warning);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Received data for unknown series '{seriesName}'", LogType.Warning);
+                                    }
+                                    break;
+                                default:
+                                    AddOutputLog($"Too much data received after #, it should be: #<seriesname>|<value> or #<seriesname>|<datetime>|<value> or #<seriesname>|<value>|<value>", LogType.Warning);
+                                    return;
+                            }
+
+                            break;
+                        case '!':
+                            //handle reply from commands sent to the arduino
+                            //----------------------------------------
+                            parts = data.Substring(1).Split('|');
+                            if (parts.Length == 3)
+                            {
+                                string? command = parts[0].ToLower();
+                                string? state = parts[1];
+                                string? reply = parts[2];
+                                if (!string.IsNullOrWhiteSpace(state) && state == "success")
+                                {
+                                    AddOutputLog($"Command '{command ?? ""}' executed successfully. Reply: {reply ?? ""}", LogType.Info);
+                                    //Handle specific command reply
+                                    switch (command)
+                                    {
+                                        case "stop":
+                                            // Handle stop command if needed
+                                            break;
+                                        case "start":
+                                            // Handle start command if needed
+                                            break;
+                                        default:
+                                            // Handle other commands if needed
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Reply: {reply ?? ""}", LogType.Warning);
+                                }
+                            }
+                            else
+                            {
+                                AddOutputLog($"Unexpected ! format, it should be: !<command>|<state>|<reply>, we expect the state to be success", LogType.Warning);
+                            }
+                            break;
+                        case '?':
+                            //handle commands comming from the arduino
+                            //----------------------------------------
+                            parts = data.Substring(1).Split('|');
+                            if (parts.Length == 1)
+                            {
+                                string? command = parts[0].ToLower();
+                                if (!string.IsNullOrWhiteSpace(command))
+                                {
+                                    //Handle specific command reply
+                                    switch (command)
+                                    {
+                                        case "stop":
+                                            // Handle stop command if needed
+                                            break;
+                                        case "start":
+                                            // Handle start command if needed
+                                            break;
+                                        default:
+                                            // Handle other commands if needed
+                                            break;
+                                    }
+                                    AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
+                                }
+                                else
+                                {
+                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
+                                }
+                            }
+                            else
+                            {
+                                AddOutputLog($"Unexpected ? format, it should be: ?<command> to be executed", LogType.Warning);
+                            }
+                            break;
+                        default:
+                            AddConsoleOut(data);
+                            break;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
         }
 
         #endregion
@@ -688,7 +932,7 @@ namespace ArduinoGraphViewer
             {
                 if (MessageBox.Show("Are you sure you want to clear all data from the graph?", "Clear graph", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    foreach(var series in _chart.Series)
+                    foreach (var series in _chart.Series)
                     {
                         series.Points.Clear();
                     }
@@ -976,170 +1220,25 @@ namespace ArduinoGraphViewer
 
         #region SERIALPORT
 
+
         private void _arduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
-                string data = _arduino.ReadLine().Trim().TrimEnd('\r', '\n');
-                // Process data here
-                if (!string.IsNullOrEmpty(data) && data.Length > 0)
+
+                string incoming = _arduino.ReadExisting(); // Non-blocking
+                _serialBuffer.Append(incoming);
+
+                while (_serialBuffer.ToString().Contains("\n"))
                 {
-                    string[] parts;
-                    switch (data[0])
-                    {
-                        case '#':
+                    string fullBuffer = _serialBuffer.ToString();
+                    int newlineIndex = fullBuffer.IndexOf('\n');
 
-                            //handle data points for the graph
-                            //----------------------------------------
-                            parts = data.Substring(1).Split('|');
-                            string seriesName;
-                            switch (parts.Length)
-                            {
-                                case 0:
-                                    AddOutputLog($"No data received after #", LogType.Warning);
-                                    return;
-                                case 1:
-                                    AddOutputLog($"Not enough data received after #, it should be: #<seriesname>|<value> or #<seriesname>|<datetime>|<value> or #<seriesname>|<value>|<value>", LogType.Warning);
-                                    return;
-                                case 2:
-                                    //correct format
-                                    seriesName = parts[0];
-                                    if (_chart.Series.FindByName(seriesName) != null)
-                                    {
-                                        if (rbTimeSeries.Checked)
-                                        {
-                                            if (double.TryParse(parts[1], out double value))
-                                            {
-                                                AddTimeSeriesPoint(seriesName, DateTime.Now, value);
-                                            }
-                                            else
-                                            {
-                                                AddOutputLog($"Value is not a valid number: '{parts[1]}'", LogType.Warning);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            AddOutputLog($"Not enough data received after #, it should be: #<seriesname>|<value>|<value>", LogType.Warning);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        AddOutputLog($"Received data for unknown series '{seriesName}'", LogType.Warning);
-                                    }
-                                    break;
-                                case 3:
-                                    //correct format
-                                    seriesName = parts[0];
-                                    if (_chart.Series.FindByName(seriesName) != null)
-                                    {
-                                        if (rbTimeSeries.Checked)
-                                        {
-                                            if (DateTime.TryParse(parts[1], out DateTime time) && double.TryParse(parts[2], out double value))
-                                            {
-                                                AddTimeSeriesPoint(seriesName, time, value);
-                                            }
-                                            else
-                                            {
-                                                AddOutputLog($"DateTime is not valid: '{parts[1]}' or Value is not a valid number: '{parts[2]}'", LogType.Warning);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (double.TryParse(parts[1], out double x) && double.TryParse(parts[2], out double y))
-                                            {
-                                                AddXYPoint(seriesName, x, y);
-                                            }
-                                            else
-                                            {
-                                                AddOutputLog($"X is not a valid number: '{parts[1]}' or Y is not a valid number: '{parts[2]}'", LogType.Warning);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        AddOutputLog($"Received data for unknown series '{seriesName}'", LogType.Warning);
-                                    }
-                                    break;
-                                default:
-                                    AddOutputLog($"Too much data received after #, it should be: #<seriesname>|<value> or #<seriesname>|<datetime>|<value> or #<seriesname>|<value>|<value>", LogType.Warning);
-                                    return;
-                            }
+                    string line = fullBuffer.Substring(0, newlineIndex).Trim('\r', '\n');
+                    _serialBuffer.Remove(0, newlineIndex + 1);
 
-                            break;
-                        case '!':
-                            //handle reply from commands sent to the arduino
-                            //----------------------------------------
-                            parts = data.Substring(1).Split('|');
-                            if (parts.Length == 3)
-                            {
-                                string? command = parts[0].ToLower();
-                                string? state = parts[1];
-                                string? reply = parts[2];
-                                if (!string.IsNullOrWhiteSpace(state) && state == "success")
-                                {
-                                    AddOutputLog($"Command '{command ?? ""}' executed successfully. Reply: {reply ?? ""}", LogType.Info);
-                                    //Handle specific command reply
-                                    switch (command)
-                                    {
-                                        case "stop":
-                                            // Handle stop command if needed
-                                            break;
-                                        case "start":
-                                            // Handle start command if needed
-                                            break;
-                                        default:
-                                            // Handle other commands if needed
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Reply: {reply ?? ""}", LogType.Warning);
-                                }
-                            }
-                            else
-                            {
-                                AddOutputLog($"Unexpected ! format, it should be: !<command>|<state>|<reply>, we expect the state to be success", LogType.Warning);
-                            }
-                            break;
-                        case '?':
-                            //handle commands comming from the arduino
-                            //----------------------------------------
-                            parts = data.Substring(1).Split('|');
-                            if (parts.Length == 1)
-                            {
-                                string? command = parts[0].ToLower();
-                                if (!string.IsNullOrWhiteSpace(command))
-                                {
-                                    //Handle specific command reply
-                                    switch (command)
-                                    {
-                                        case "stop":
-                                            // Handle stop command if needed
-                                            break;
-                                        case "start":
-                                            // Handle start command if needed
-                                            break;
-                                        default:
-                                            // Handle other commands if needed
-                                            break;
-                                    }
-                                    AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
-                                }
-                                else
-                                {
-                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
-                                }
-                            }
-                            else
-                            {
-                                AddOutputLog($"Unexpected ? format, it should be: ?<command> to be executed", LogType.Warning);
-                            }
-                            break;
-                        default:
-                            AddConsoleOut(data);
-                            break;
-                    }
+                    // Now you have a complete line — process it
+                    HandleReceivedSerialData(line);
                 }
 
             }
@@ -1218,7 +1317,7 @@ namespace ArduinoGraphViewer
 
                 // Keep only the last x lines
                 int maxLines = 200;
-                int.TryParse(TXTMaxLines.Text, out maxLines);
+                int.TryParse(TXTMaxLines.Text, CultureInfo.InvariantCulture, out maxLines);
 
                 if (lines.Count > maxLines)
                     lines = lines.Skip(lines.Count - maxLines).ToList();
@@ -1257,7 +1356,7 @@ namespace ArduinoGraphViewer
 
                 // Keep only the last x lines
                 int maxLines = 200;
-                int.TryParse(TXTMaxConsoleLines.Text, out maxLines);
+                int.TryParse(TXTMaxConsoleLines.Text, CultureInfo.InvariantCulture, out maxLines);
 
                 if (lines.Count > maxLines)
                     lines = lines.Skip(lines.Count - maxLines).ToList();
