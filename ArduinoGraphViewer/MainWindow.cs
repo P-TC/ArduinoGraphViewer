@@ -1,6 +1,7 @@
 using Microsoft.VisualBasic.Logging;
 using System;
 using System.IO.Ports;
+using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
 
 namespace ArduinoGraphViewer
@@ -8,6 +9,8 @@ namespace ArduinoGraphViewer
     public partial class MainWindow : Form
     {
         #region VARS
+
+        private bool _bInitBusy = true;
 
         private SerialPort _arduino;
 
@@ -152,14 +155,28 @@ namespace ArduinoGraphViewer
                         var series = _chart.Series[seriesName];
                         double xValue = time.Value.ToOADate();
 
-                        int index = FindInsertIndex(series.Points, xValue);
+                        int rowIndex = FindInsertIndex(series.Points, xValue);
 
                         var point = new DataPoint(xValue, value.Value)
                         {
                             ToolTip = $"Name: {seriesName}\nDate: {time:dd-MM-yyyy}\nTime: {time:HH:mm:ss.fff}\nValue: {value:0.000}"
                         };
 
-                        series.Points.Insert(index, point);
+                        series.Points.Insert(rowIndex, point);
+                        while (series.Points.Count > _dgv.Rows.Count)
+                        {
+                            _dgv.Rows.Add();
+                        }
+
+                        if (rowIndex >= 0 && rowIndex < _dgv.Rows.Count)
+                        {
+                            var row = _dgv.Rows[rowIndex];
+                            if (_dgv.Columns[series.Name + "_Time"] != null)
+                                row.Cells[series.Name + "_Time"].Value = time.Value.ToString("dd-MM-yyyy HH:mm:ss.fff");
+                            if (_dgv.Columns[series.Name] != null)
+                                row.Cells[series.Name].Value = value.Value.ToString("0.000");
+                        }
+
 
                         bool bUpdateXAxis = false;
                         if (time < _earliestTime || _earliestTime == DateTime.MinValue)
@@ -200,7 +217,20 @@ namespace ArduinoGraphViewer
                         {
                             ToolTip = $"X: {x.Value:0.000}\nY: {y.Value:0.000}"
                         };
-                        series.Points.AddXY(x.Value, y.Value);
+                        int rowIndex = series.Points.AddXY(x.Value, y.Value);
+                        while (series.Points.Count > _dgv.Rows.Count)
+                        {
+                            _dgv.Rows.Add();
+                        }
+
+                        if (rowIndex >= 0 && rowIndex < _dgv.Rows.Count)
+                        {
+                            var row = _dgv.Rows[rowIndex];
+                            if (_dgv.Columns[series.Name + "_X"] != null)
+                                row.Cells[series.Name + "_X"].Value = x.Value.ToString("0.000");
+                            if (_dgv.Columns[series.Name + "_Y"] != null)
+                                row.Cells[series.Name + "_Y"].Value = y.Value.ToString("0.000");
+                        }
 
                         bool bUpdateXRange = false;
                         if (x.Value < _minX || _minX == double.MinValue)
@@ -271,6 +301,33 @@ namespace ArduinoGraphViewer
 
         #endregion
 
+        #region CSV
+
+        public void ExportDataGridViewToCsv(DataGridView dgv, string filePath)
+        {
+            var sb = new StringBuilder();
+
+            // Write headers
+            var headers = dgv.Columns.Cast<DataGridViewColumn>()
+                .Select(col => "\"" + col.HeaderText.Replace("\"", "\"\"") + "\"");
+            sb.AppendLine(string.Join(";", headers));
+
+            // Write rows
+            foreach (DataGridViewRow row in dgv.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    var cells = row.Cells.Cast<DataGridViewCell>()
+                        .Select(cell => "\"" + cell.Value?.ToString().Replace("\"", "\"\"") + "\"");
+                    sb.AppendLine(string.Join(";", cells));
+                }
+            }
+
+            File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+        }
+
+
+        #endregion
 
         #endregion
 
@@ -293,8 +350,17 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                // Implement save functionality here
-                AddOutputLog($"Save functionality not implemented yet", LogType.Warning);
+                using(SaveFileDialog sfd = new SaveFileDialog())
+                {
+                    sfd.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+                    sfd.Title = "Save Data to CSV";
+                    sfd.FileName = "GraphData.csv";
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        ExportDataGridViewToCsv(_dgv, sfd.FileName);
+                        AddOutputLog($"Data exported to {sfd.FileName}", LogType.Info);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -471,6 +537,25 @@ namespace ArduinoGraphViewer
 
                             if (rbTimeSeries.Checked)
                             {
+                                if (_dgv.Columns[series.Name + "_Time"] == null)
+                                {
+                                    _dgv.Columns.Add(series.Name + "_Time", series.Name + "_Time");
+                                    _dgv.Columns[series.Name + "_Time"].Width = 150;
+                                    _dgv.Columns[series.Name + "_Time"].SortMode = DataGridViewColumnSortMode.NotSortable;
+                                    _dgv.Columns[series.Name + "_Time"].DefaultCellStyle.BackColor = series.Color;
+                                }
+                                if (_dgv.Columns[series.Name] == null)
+                                {
+                                    _dgv.Columns.Add(series.Name, series.Name);
+                                    _dgv.Columns[series.Name].Width = 80;
+                                    _dgv.Columns[series.Name].SortMode = DataGridViewColumnSortMode.NotSortable;
+                                    _dgv.Columns[series.Name].DefaultCellStyle.BackColor = series.Color;
+                                }
+                                Application.DoEvents();
+                                Thread.Sleep(100);
+
+                                //Example data
+
                                 series.XValueType = ChartValueType.DateTime;
                                 series.YValueType = ChartValueType.Single;
                                 AddTimeSeriesPoint(series.Name, DateTime.Now, 10);
@@ -480,6 +565,24 @@ namespace ArduinoGraphViewer
                             }
                             else
                             {
+                                if (_dgv.Columns[series.Name + "_X"] == null)
+                                {
+                                    _dgv.Columns.Add(series.Name + "_X", series.Name + "_X");
+                                    _dgv.Columns[series.Name + "_X"].Width = 80;
+                                    _dgv.Columns[series.Name + "_X"].SortMode = DataGridViewColumnSortMode.NotSortable;
+                                    _dgv.Columns[series.Name + "_X"].DefaultCellStyle.BackColor = series.Color;
+                                }
+                                if (_dgv.Columns[series.Name + "_Y"] == null)
+                                {
+                                    _dgv.Columns.Add(series.Name + "_Y", series.Name + "_Y");
+                                    _dgv.Columns[series.Name + "_Y"].Width = 80;
+                                    _dgv.Columns[series.Name + "_Y"].SortMode = DataGridViewColumnSortMode.NotSortable;
+                                    _dgv.Columns[series.Name + "_Y"].DefaultCellStyle.BackColor = series.Color;
+                                }
+                                Application.DoEvents();
+                                Thread.Sleep(100);
+
+                                //Example data
                                 series.XValueType = ChartValueType.Single;
                                 series.YValueType = ChartValueType.Single;
                                 AddXYPoint(series.Name, 10, 10);
@@ -514,6 +617,8 @@ namespace ArduinoGraphViewer
                 if (MessageBox.Show("Are you sure you want to clear all data from the graph?", "Clear graph", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     _chart.Series.Clear();
+                    _dgv.Rows.Clear();
+                    _dgv.Columns.Clear();
                     if (rbTimeSeries.Checked)
                     {
                         _latestTime = DateTime.MinValue;
@@ -563,7 +668,6 @@ namespace ArduinoGraphViewer
         }
 
         #endregion
-
 
         #endregion
 
@@ -632,7 +736,22 @@ namespace ArduinoGraphViewer
             {
                 if (rbTimeSeries.Checked)
                 {
+                    if (!_bInitBusy)
+                    {
+                        if (MessageBox.Show("Switching to Time Series mode will clear the current graph and data. Do you want to continue?", "Switch Mode", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            rbXy.CheckedChanged -= rbXy_CheckedChanged;
+                            rbXy.Checked = true;
+                            rbXy.CheckedChanged += rbXy_CheckedChanged;
+                            return;
+                        }
+                    }
+                    _bInitBusy = false;
+
+
                     _chart.Series.Clear();
+                    _dgv.Rows.Clear();
+                    _dgv.Columns.Clear();
                     _latestTime = DateTime.MinValue;
                     _earliestTime = DateTime.MinValue;
 
@@ -664,6 +783,13 @@ namespace ArduinoGraphViewer
             {
                 if (rbXy.Checked)
                 {
+                    if (MessageBox.Show("Switching to XY mode will clear the current graph and data. Do you want to continue?", "Switch Mode", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                    {
+                        rbTimeSeries.CheckedChanged -= rbTimeSeries_CheckedChanged;
+                        rbTimeSeries.Checked = true;
+                        rbTimeSeries.CheckedChanged += rbTimeSeries_CheckedChanged;
+                        return;
+                    }
                     _chart.Series.Clear();
                     _minX = double.MinValue;
                     _maxX = double.MaxValue;
@@ -671,6 +797,8 @@ namespace ArduinoGraphViewer
                     _maxY = double.MaxValue;
 
                     _chart.ChartAreas.Clear();
+                    _dgv.Rows.Clear();
+                    _dgv.Columns.Clear();
                     _chart.ChartAreas.Add("chartArea");
                     _chart.ChartAreas["chartArea"].AxisX.LabelStyle.Format = "0.000";
                     _chart.ChartAreas["chartArea"].AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
@@ -738,6 +866,23 @@ namespace ArduinoGraphViewer
                     if (series != null)
                     {
                         series.Enabled = !series.Enabled;
+
+                        var column = _dgv.Columns[series.Name + "_Time"];
+                        if (column != null)
+                            column.Visible = series.Enabled;
+
+                        column = _dgv.Columns[series.Name];
+                        if (column != null)
+                            column.Visible = series.Enabled;
+
+                        column = _dgv.Columns[series.Name + "_X"];
+                        if (column != null)
+                            column.Visible = series.Enabled;
+
+                        column = _dgv.Columns[series.Name + "_Y"];
+                        if (column != null)
+                            column.Visible = series.Enabled;
+
                         _chart.Invalidate(); // Refresh chart
                     }
                 }

@@ -45,6 +45,7 @@
             rbTimeSeries = new RadioButton();
             rbXy = new RadioButton();
             BtnRemoveGraph = new Button();
+            BtnClear = new Button();
             BtnAddGraph = new Button();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
@@ -59,7 +60,6 @@
             TXTOutput = new TextBox();
             statusStrip = new StatusStrip();
             tsslStatus = new ToolStripStatusLabel();
-            BtnClear = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -223,6 +223,10 @@
             // 
             // _dgv
             // 
+            _dgv.AllowUserToAddRows = false;
+            _dgv.AllowUserToDeleteRows = false;
+            _dgv.AllowUserToOrderColumns = true;
+            _dgv.AllowUserToResizeRows = false;
             _dgv.BorderStyle = BorderStyle.Fixed3D;
             _dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             _dgv.Dock = DockStyle.Fill;
@@ -322,6 +326,17 @@
             BtnRemoveGraph.UseVisualStyleBackColor = true;
             BtnRemoveGraph.Click += BtnRemoveGraph_Click;
             // 
+            // BtnClear
+            // 
+            BtnClear.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            BtnClear.Location = new Point(3, 60);
+            BtnClear.Name = "BtnClear";
+            BtnClear.Size = new Size(73, 55);
+            BtnClear.TabIndex = 0;
+            BtnClear.Text = "Clear...";
+            BtnClear.UseVisualStyleBackColor = true;
+            BtnClear.Click += BtnClear_Click;
+            // 
             // BtnAddGraph
             // 
             BtnAddGraph.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -352,20 +367,20 @@
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(107, 22);
+            exitToolStripMenuItem.Size = new Size(180, 22);
             exitToolStripMenuItem.Text = "&Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(104, 6);
+            toolStripMenuItem1.Size = new Size(177, 6);
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(107, 22);
-            saveToolStripMenuItem.Text = "&Save...";
+            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Text = "&Save data as CSV...";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // arduinoToolStripMenuItem
@@ -428,17 +443,6 @@
             tsslStatus.Name = "tsslStatus";
             tsslStatus.Size = new Size(48, 17);
             tsslStatus.Text = "Status...";
-            // 
-            // BtnClear
-            // 
-            BtnClear.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            BtnClear.Location = new Point(3, 60);
-            BtnClear.Name = "BtnClear";
-            BtnClear.Size = new Size(73, 55);
-            BtnClear.TabIndex = 0;
-            BtnClear.Text = "Clear...";
-            BtnClear.UseVisualStyleBackColor = true;
-            BtnClear.Click += BtnClear_Click;
             // 
             // MainWindow
             // 
