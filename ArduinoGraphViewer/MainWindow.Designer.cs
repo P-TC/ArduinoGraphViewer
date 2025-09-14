@@ -336,6 +336,7 @@
             splitContainer5.BorderStyle = BorderStyle.Fixed3D;
             splitContainer5.Dock = DockStyle.Fill;
             splitContainer5.FixedPanel = FixedPanel.Panel2;
+            splitContainer5.IsSplitterFixed = true;
             splitContainer5.Location = new Point(0, 24);
             splitContainer5.Name = "splitContainer5";
             // 
@@ -497,6 +498,7 @@
             splitContainer6.BorderStyle = BorderStyle.Fixed3D;
             splitContainer6.Dock = DockStyle.Fill;
             splitContainer6.FixedPanel = FixedPanel.Panel2;
+            splitContainer6.IsSplitterFixed = true;
             splitContainer6.Location = new Point(0, 0);
             splitContainer6.Name = "splitContainer6";
             // 

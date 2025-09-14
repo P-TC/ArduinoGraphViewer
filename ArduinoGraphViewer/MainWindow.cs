@@ -970,6 +970,14 @@ void handleCommand(String cmd) {
                         if (series != null)
                         {
                             _chart.Series.Remove(series);
+                            if(_dgv.Columns[series.Name] != null)
+                                _dgv.Columns.Remove(series.Name);
+                            if(_dgv.Columns[series.Name + "_Time"] != null)
+                                _dgv.Columns.Remove(series.Name + "_Time");
+                            if(_dgv.Columns[series.Name + "_X"] != null)
+                                _dgv.Columns.Remove(series.Name + "_X");
+                            if(_dgv.Columns[series.Name + "_Y"] != null)
+                                _dgv.Columns.Remove(series.Name + "_Y");
                             AddOutputLog($"Graph '{removeSeries.SelectedSeries}' removed", LogType.Info);
                         }
                         else
