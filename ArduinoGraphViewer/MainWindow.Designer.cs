@@ -33,6 +33,11 @@
             gbControl = new GroupBox();
             BtnStart = new Button();
             BtnStop = new Button();
+            LblMaxConsoleLines = new Label();
+            TXTMaxConsoleLines = new TextBox();
+            chAddTimestamp = new CheckBox();
+            chAutoScrollConsole = new CheckBox();
+            BtnClearConsoleOut = new Button();
             BtnConsoleSend = new Button();
             TXTConsoleIn = new TextBox();
             TXTConsoleOut = new TextBox();
@@ -57,7 +62,12 @@
             disconnectToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
+            splitContainer6 = new SplitContainer();
             TXTOutput = new TextBox();
+            LblMaxLines = new Label();
+            TXTMaxLines = new TextBox();
+            chAutoScroll = new CheckBox();
+            BtnClearOutput = new Button();
             statusStrip = new StatusStrip();
             tsslStatus = new ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -85,6 +95,10 @@
             splitContainer5.SuspendLayout();
             gbGraphType.SuspendLayout();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer6).BeginInit();
+            splitContainer6.Panel1.SuspendLayout();
+            splitContainer6.Panel2.SuspendLayout();
+            splitContainer6.SuspendLayout();
             statusStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -102,7 +116,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(splitContainer2);
-            splitContainer1.Size = new Size(980, 632);
+            splitContainer1.Size = new Size(980, 652);
             splitContainer1.SplitterDistance = 269;
             splitContainer1.TabIndex = 0;
             // 
@@ -120,11 +134,16 @@
             // 
             // splitContainer3.Panel2
             // 
+            splitContainer3.Panel2.Controls.Add(LblMaxConsoleLines);
+            splitContainer3.Panel2.Controls.Add(TXTMaxConsoleLines);
+            splitContainer3.Panel2.Controls.Add(chAddTimestamp);
+            splitContainer3.Panel2.Controls.Add(chAutoScrollConsole);
+            splitContainer3.Panel2.Controls.Add(BtnClearConsoleOut);
             splitContainer3.Panel2.Controls.Add(BtnConsoleSend);
             splitContainer3.Panel2.Controls.Add(TXTConsoleIn);
             splitContainer3.Panel2.Controls.Add(TXTConsoleOut);
-            splitContainer3.Size = new Size(269, 632);
-            splitContainer3.SplitterDistance = 119;
+            splitContainer3.Size = new Size(269, 652);
+            splitContainer3.SplitterDistance = 122;
             splitContainer3.TabIndex = 0;
             // 
             // gbControl
@@ -135,7 +154,7 @@
             gbControl.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             gbControl.Location = new Point(0, 0);
             gbControl.Name = "gbControl";
-            gbControl.Size = new Size(265, 115);
+            gbControl.Size = new Size(265, 118);
             gbControl.TabIndex = 0;
             gbControl.TabStop = false;
             gbControl.Text = "Control";
@@ -161,10 +180,63 @@
             BtnStop.UseVisualStyleBackColor = true;
             BtnStop.Click += BtnStop_Click;
             // 
+            // LblMaxConsoleLines
+            // 
+            LblMaxConsoleLines.AutoSize = true;
+            LblMaxConsoleLines.Location = new Point(3, 7);
+            LblMaxConsoleLines.Name = "LblMaxConsoleLines";
+            LblMaxConsoleLines.Size = new Size(37, 15);
+            LblMaxConsoleLines.TabIndex = 3;
+            LblMaxConsoleLines.Text = "Lines:";
+            // 
+            // TXTMaxConsoleLines
+            // 
+            TXTMaxConsoleLines.Location = new Point(43, 2);
+            TXTMaxConsoleLines.Name = "TXTMaxConsoleLines";
+            TXTMaxConsoleLines.Size = new Size(33, 23);
+            TXTMaxConsoleLines.TabIndex = 2;
+            TXTMaxConsoleLines.Text = "200";
+            TXTMaxConsoleLines.TextAlign = HorizontalAlignment.Right;
+            // 
+            // chAddTimestamp
+            // 
+            chAddTimestamp.AutoSize = true;
+            chAddTimestamp.Checked = true;
+            chAddTimestamp.CheckState = CheckState.Checked;
+            chAddTimestamp.Location = new Point(92, 25);
+            chAddTimestamp.Name = "chAddTimestamp";
+            chAddTimestamp.Size = new Size(78, 19);
+            chAddTimestamp.TabIndex = 1;
+            chAddTimestamp.Text = "Add Time";
+            chAddTimestamp.UseVisualStyleBackColor = true;
+            // 
+            // chAutoScrollConsole
+            // 
+            chAutoScrollConsole.AutoSize = true;
+            chAutoScrollConsole.Checked = true;
+            chAutoScrollConsole.CheckState = CheckState.Checked;
+            chAutoScrollConsole.Location = new Point(92, 6);
+            chAutoScrollConsole.Name = "chAutoScrollConsole";
+            chAutoScrollConsole.Size = new Size(84, 19);
+            chAutoScrollConsole.TabIndex = 1;
+            chAutoScrollConsole.Text = "Auto Scroll";
+            chAutoScrollConsole.UseVisualStyleBackColor = true;
+            // 
+            // BtnClearConsoleOut
+            // 
+            BtnClearConsoleOut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            BtnClearConsoleOut.Location = new Point(212, 3);
+            BtnClearConsoleOut.Name = "BtnClearConsoleOut";
+            BtnClearConsoleOut.Size = new Size(50, 34);
+            BtnClearConsoleOut.TabIndex = 0;
+            BtnClearConsoleOut.Text = "Clear";
+            BtnClearConsoleOut.UseVisualStyleBackColor = true;
+            BtnClearConsoleOut.Click += BtnClearConsoleOut_Click;
+            // 
             // BtnConsoleSend
             // 
             BtnConsoleSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            BtnConsoleSend.Location = new Point(212, 479);
+            BtnConsoleSend.Location = new Point(212, 496);
             BtnConsoleSend.Name = "BtnConsoleSend";
             BtnConsoleSend.Size = new Size(50, 23);
             BtnConsoleSend.TabIndex = 2;
@@ -175,9 +247,9 @@
             // TXTConsoleIn
             // 
             TXTConsoleIn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            TXTConsoleIn.Location = new Point(3, 479);
+            TXTConsoleIn.Location = new Point(3, 496);
             TXTConsoleIn.Name = "TXTConsoleIn";
-            TXTConsoleIn.PlaceholderText = "ConsoleIn...";
+            TXTConsoleIn.PlaceholderText = "type 'help' for more info";
             TXTConsoleIn.Size = new Size(202, 23);
             TXTConsoleIn.TabIndex = 1;
             TXTConsoleIn.KeyDown += TXTConsoleIn_KeyDown;
@@ -185,13 +257,15 @@
             // TXTConsoleOut
             // 
             TXTConsoleOut.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            TXTConsoleOut.Location = new Point(3, 3);
+            TXTConsoleOut.Location = new Point(3, 43);
             TXTConsoleOut.Multiline = true;
             TXTConsoleOut.Name = "TXTConsoleOut";
             TXTConsoleOut.PlaceholderText = "ConsoleOut...";
             TXTConsoleOut.ReadOnly = true;
-            TXTConsoleOut.Size = new Size(259, 470);
+            TXTConsoleOut.ScrollBars = ScrollBars.Both;
+            TXTConsoleOut.Size = new Size(259, 447);
             TXTConsoleOut.TabIndex = 0;
+            TXTConsoleOut.WordWrap = false;
             // 
             // splitContainer2
             // 
@@ -208,8 +282,8 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(_dgv);
-            splitContainer2.Size = new Size(707, 632);
-            splitContainer2.SplitterDistance = 343;
+            splitContainer2.Size = new Size(707, 652);
+            splitContainer2.SplitterDistance = 353;
             splitContainer2.TabIndex = 0;
             // 
             // _chart
@@ -217,7 +291,7 @@
             _chart.Dock = DockStyle.Fill;
             _chart.Location = new Point(0, 0);
             _chart.Name = "_chart";
-            _chart.Size = new Size(703, 339);
+            _chart.Size = new Size(703, 349);
             _chart.TabIndex = 0;
             _chart.Text = "chart1";
             // 
@@ -232,14 +306,14 @@
             _dgv.Dock = DockStyle.Fill;
             _dgv.Location = new Point(0, 0);
             _dgv.Name = "_dgv";
-            _dgv.Size = new Size(703, 281);
+            _dgv.Size = new Size(703, 291);
             _dgv.TabIndex = 0;
             // 
             // splitContainer4
             // 
             splitContainer4.BorderStyle = BorderStyle.Fixed3D;
             splitContainer4.Dock = DockStyle.Fill;
-            splitContainer4.IsSplitterFixed = true;
+            splitContainer4.FixedPanel = FixedPanel.Panel2;
             splitContainer4.Location = new Point(0, 0);
             splitContainer4.Name = "splitContainer4";
             splitContainer4.Orientation = Orientation.Horizontal;
@@ -251,10 +325,10 @@
             // 
             // splitContainer4.Panel2
             // 
-            splitContainer4.Panel2.Controls.Add(TXTOutput);
+            splitContainer4.Panel2.Controls.Add(splitContainer6);
             splitContainer4.Panel2.Controls.Add(statusStrip);
-            splitContainer4.Size = new Size(1065, 780);
-            splitContainer4.SplitterDistance = 656;
+            splitContainer4.Size = new Size(1065, 828);
+            splitContainer4.SplitterDistance = 676;
             splitContainer4.TabIndex = 1;
             // 
             // splitContainer5
@@ -275,7 +349,7 @@
             splitContainer5.Panel2.Controls.Add(BtnRemoveGraph);
             splitContainer5.Panel2.Controls.Add(BtnClear);
             splitContainer5.Panel2.Controls.Add(BtnAddGraph);
-            splitContainer5.Size = new Size(1065, 632);
+            splitContainer5.Size = new Size(1065, 652);
             splitContainer5.SplitterDistance = 980;
             splitContainer5.TabIndex = 2;
             // 
@@ -318,7 +392,7 @@
             // BtnRemoveGraph
             // 
             BtnRemoveGraph.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            BtnRemoveGraph.Location = new Point(3, 570);
+            BtnRemoveGraph.Location = new Point(3, 590);
             BtnRemoveGraph.Name = "BtnRemoveGraph";
             BtnRemoveGraph.Size = new Size(73, 55);
             BtnRemoveGraph.TabIndex = 0;
@@ -367,19 +441,19 @@
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(180, 22);
+            exitToolStripMenuItem.Size = new Size(171, 22);
             exitToolStripMenuItem.Text = "&Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(177, 6);
+            toolStripMenuItem1.Size = new Size(168, 6);
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(171, 22);
             saveToolStripMenuItem.Text = "&Save data as CSV...";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
@@ -418,6 +492,28 @@
             helpToolStripMenuItem.Text = "&Help";
             helpToolStripMenuItem.Click += helpToolStripMenuItem_Click;
             // 
+            // splitContainer6
+            // 
+            splitContainer6.BorderStyle = BorderStyle.Fixed3D;
+            splitContainer6.Dock = DockStyle.Fill;
+            splitContainer6.FixedPanel = FixedPanel.Panel2;
+            splitContainer6.Location = new Point(0, 0);
+            splitContainer6.Name = "splitContainer6";
+            // 
+            // splitContainer6.Panel1
+            // 
+            splitContainer6.Panel1.Controls.Add(TXTOutput);
+            // 
+            // splitContainer6.Panel2
+            // 
+            splitContainer6.Panel2.Controls.Add(LblMaxLines);
+            splitContainer6.Panel2.Controls.Add(TXTMaxLines);
+            splitContainer6.Panel2.Controls.Add(chAutoScroll);
+            splitContainer6.Panel2.Controls.Add(BtnClearOutput);
+            splitContainer6.Size = new Size(1065, 126);
+            splitContainer6.SplitterDistance = 980;
+            splitContainer6.TabIndex = 2;
+            // 
             // TXTOutput
             // 
             TXTOutput.Dock = DockStyle.Fill;
@@ -427,15 +523,55 @@
             TXTOutput.PlaceholderText = "Application Output...";
             TXTOutput.ReadOnly = true;
             TXTOutput.ScrollBars = ScrollBars.Vertical;
-            TXTOutput.Size = new Size(1061, 94);
+            TXTOutput.Size = new Size(976, 122);
             TXTOutput.TabIndex = 1;
+            // 
+            // LblMaxLines
+            // 
+            LblMaxLines.AutoSize = true;
+            LblMaxLines.Location = new Point(-2, 99);
+            LblMaxLines.Name = "LblMaxLines";
+            LblMaxLines.Size = new Size(37, 15);
+            LblMaxLines.TabIndex = 3;
+            LblMaxLines.Text = "Lines:";
+            // 
+            // TXTMaxLines
+            // 
+            TXTMaxLines.Location = new Point(41, 96);
+            TXTMaxLines.Name = "TXTMaxLines";
+            TXTMaxLines.Size = new Size(33, 23);
+            TXTMaxLines.TabIndex = 2;
+            TXTMaxLines.Text = "200";
+            TXTMaxLines.TextAlign = HorizontalAlignment.Right;
+            // 
+            // chAutoScroll
+            // 
+            chAutoScroll.AutoSize = true;
+            chAutoScroll.Checked = true;
+            chAutoScroll.CheckState = CheckState.Checked;
+            chAutoScroll.Location = new Point(13, 3);
+            chAutoScroll.Name = "chAutoScroll";
+            chAutoScroll.Size = new Size(55, 34);
+            chAutoScroll.TabIndex = 1;
+            chAutoScroll.Text = "Auto\r\nScroll";
+            chAutoScroll.UseVisualStyleBackColor = true;
+            // 
+            // BtnClearOutput
+            // 
+            BtnClearOutput.Location = new Point(3, 36);
+            BtnClearOutput.Name = "BtnClearOutput";
+            BtnClearOutput.Size = new Size(73, 55);
+            BtnClearOutput.TabIndex = 0;
+            BtnClearOutput.Text = "Clear";
+            BtnClearOutput.UseVisualStyleBackColor = true;
+            BtnClearOutput.Click += BtnClearOutput_Click;
             // 
             // statusStrip
             // 
             statusStrip.Items.AddRange(new ToolStripItem[] { tsslStatus });
-            statusStrip.Location = new Point(0, 94);
+            statusStrip.Location = new Point(0, 126);
             statusStrip.Name = "statusStrip";
-            statusStrip.Size = new Size(1061, 22);
+            statusStrip.Size = new Size(1065, 22);
             statusStrip.TabIndex = 0;
             // 
             // tsslStatus
@@ -448,7 +584,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1065, 780);
+            ClientSize = new Size(1065, 828);
             Controls.Add(splitContainer4);
             MainMenuStrip = menuStrip1;
             Name = "MainWindow";
@@ -483,6 +619,12 @@
             gbGraphType.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            splitContainer6.Panel1.ResumeLayout(false);
+            splitContainer6.Panel1.PerformLayout();
+            splitContainer6.Panel2.ResumeLayout(false);
+            splitContainer6.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer6).EndInit();
+            splitContainer6.ResumeLayout(false);
             statusStrip.ResumeLayout(false);
             statusStrip.PerformLayout();
             ResumeLayout(false);
@@ -522,5 +664,15 @@
         private RadioButton rbTimeSeries;
         private RadioButton rbXy;
         private Button BtnClear;
+        private SplitContainer splitContainer6;
+        private CheckBox chAutoScroll;
+        private Button BtnClearOutput;
+        private Label LblMaxLines;
+        private TextBox TXTMaxLines;
+        private Label LblMaxConsoleLines;
+        private TextBox TXTMaxConsoleLines;
+        private CheckBox chAutoScrollConsole;
+        private Button BtnClearConsoleOut;
+        private CheckBox chAddTimestamp;
     }
 }

@@ -89,6 +89,8 @@ namespace ArduinoGraphViewer
                 _workerThread.IsBackground = true;
                 _workerThread.Start();
 
+                tsslStatus.Text = "Not connected";
+
             }
             catch (Exception ex)
             {
@@ -329,6 +331,77 @@ namespace ArduinoGraphViewer
 
         #endregion
 
+        #region CONSOLE
+
+        private void HandleHelp()
+        {
+            try
+            {
+                AddConsoleOut("Available commands:", true);
+                AddConsoleOut("-----------------------", true);
+                AddConsoleOut(" ", true);
+                AddConsoleOut("help - Show this help message", true);
+                AddConsoleOut("clear - Clear the console output", true);
+                AddConsoleOut("<command> - execute a specific command on the Arduino", true);
+                AddConsoleOut(" ", true);
+                AddConsoleOut("Possible replies:", true);
+                AddConsoleOut("-----------------", true);
+                AddConsoleOut("#<seriesname>|<value> - adds a point to an existing Time series matching the seriesname (PC time for timestamp)", true);
+                AddConsoleOut("#<seriesname>|<datetime>|<value> - adds a point to an existing Time series matching the seriesname", true);
+                AddConsoleOut("#<seriesname>|<value>|<value> - adds a point to an existing Value series matching the seriesname", true);
+                AddConsoleOut("!<command>|<state>|<reply> - reply format to be handled by this application", true);
+                AddConsoleOut("?<command> - command to be handled by this application", true);
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+
+        }
+
+        private void HandleConsoleIn(string command)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(command))
+                {
+                    switch (command.ToLower())
+                    {
+                        case "help":
+                            HandleHelp();
+                            break;
+                        case "clear":
+                            TXTConsoleOut.Clear();
+                            break;
+                        default:
+                            if (_arduino != null && _arduino.IsOpen)
+                            {
+                                _arduino.WriteLine(command);
+                                AddOutputLog($"Command sent: {command}", LogType.Info);
+                            }
+                            else
+                            {
+                                AddOutputLog($"Not connected to Arduino", LogType.Warning);
+                            }
+                            AddConsoleOut(command, false);
+                            break;
+                    }
+                    TXTConsoleIn.Clear();
+                }
+                else
+                {
+                    AddOutputLog($"Please enter a command", LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+
+        }
+
+        #endregion
+
         #endregion
 
         #region MENU
@@ -350,7 +423,7 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                using(SaveFileDialog sfd = new SaveFileDialog())
+                using (SaveFileDialog sfd = new SaveFileDialog())
                 {
                     sfd.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
                     sfd.Title = "Save Data to CSV";
@@ -385,6 +458,7 @@ namespace ArduinoGraphViewer
                         _arduino.DataReceived += _arduino_DataReceived;
                         _arduino.Open();
                         AddOutputLog($"Connected to Arduino on {selector.SelectedPort}, with baudrate {selector.SelectedBaudRate}", LogType.Info);
+                        tsslStatus.Text = $"Connected to {selector.SelectedPort} at {selector.SelectedBaudRate} baud";
                     }
                 }
                 else
@@ -407,6 +481,7 @@ namespace ArduinoGraphViewer
                 {
                     _arduino.Close();
                     AddOutputLog($"Disconnected from Arduino", LogType.Info);
+                    tsslStatus.Text = "Not connected";
                 }
                 else
                 {
@@ -490,19 +565,19 @@ namespace ArduinoGraphViewer
             try
             {
                 string command = TXTConsoleIn.Text.Trim();
-                if (!string.IsNullOrEmpty(command))
-                {
-                    if (_arduino != null && _arduino.IsOpen)
-                    {
-                        _arduino.WriteLine(command);
-                        AddOutputLog($"Command sent: {command}", LogType.Info);
-                    }
-                    else
-                    {
-                        AddOutputLog($"Not connected to Arduino", LogType.Warning);
-                    }
-                    TXTConsoleIn.Clear();
-                }
+                HandleConsoleIn(command);
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+        }
+
+        private void BtnClearConsoleOut_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                TXTConsoleOut.Clear();
             }
             catch (Exception ex)
             {
@@ -551,17 +626,15 @@ namespace ArduinoGraphViewer
                                     _dgv.Columns[series.Name].SortMode = DataGridViewColumnSortMode.NotSortable;
                                     _dgv.Columns[series.Name].DefaultCellStyle.BackColor = series.Color;
                                 }
-                                Application.DoEvents();
-                                Thread.Sleep(100);
-
-                                //Example data
 
                                 series.XValueType = ChartValueType.DateTime;
                                 series.YValueType = ChartValueType.Single;
-                                AddTimeSeriesPoint(series.Name, DateTime.Now, 10);
-                                AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(1), 30);
-                                AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(3), 20);
-                                AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(8), 50);
+
+                                //Example data
+                                //AddTimeSeriesPoint(series.Name, DateTime.Now, 10);
+                                //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(1), 30);
+                                //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(3), 20);
+                                //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(8), 50);
                             }
                             else
                             {
@@ -579,16 +652,15 @@ namespace ArduinoGraphViewer
                                     _dgv.Columns[series.Name + "_Y"].SortMode = DataGridViewColumnSortMode.NotSortable;
                                     _dgv.Columns[series.Name + "_Y"].DefaultCellStyle.BackColor = series.Color;
                                 }
-                                Application.DoEvents();
-                                Thread.Sleep(100);
 
-                                //Example data
                                 series.XValueType = ChartValueType.Single;
                                 series.YValueType = ChartValueType.Single;
-                                AddXYPoint(series.Name, 10, 10);
-                                AddXYPoint(series.Name, 20, 30);
-                                AddXYPoint(series.Name, 15, 80);
-                                AddXYPoint(series.Name, 10, 50);
+
+                                //Example data
+                                //AddXYPoint(series.Name, 10, 10);
+                                //AddXYPoint(series.Name, 20, 30);
+                                //AddXYPoint(series.Name, 15, 80);
+                                //AddXYPoint(series.Name, 10, 50);
                             }
 
 
@@ -616,9 +688,11 @@ namespace ArduinoGraphViewer
             {
                 if (MessageBox.Show("Are you sure you want to clear all data from the graph?", "Clear graph", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    _chart.Series.Clear();
+                    foreach(var series in _chart.Series)
+                    {
+                        series.Points.Clear();
+                    }
                     _dgv.Rows.Clear();
-                    _dgv.Columns.Clear();
                     if (rbTimeSeries.Checked)
                     {
                         _latestTime = DateTime.MinValue;
@@ -669,6 +743,22 @@ namespace ArduinoGraphViewer
 
         #endregion
 
+        #region OUTPUT
+
+        private void BtnClearOutput_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                TXTOutput.Clear();
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+        }
+
+        #endregion
+
         #endregion
 
         #region EVENTHANDLERS
@@ -709,19 +799,7 @@ namespace ArduinoGraphViewer
                 {
                     e.SuppressKeyPress = true; // Prevent ding sound
                     string command = TXTConsoleIn.Text.Trim();
-                    if (!string.IsNullOrEmpty(command))
-                    {
-                        if (_arduino != null && _arduino.IsOpen)
-                        {
-                            _arduino.WriteLine(command);
-                            AddOutputLog($"Command sent: {command}", LogType.Info);
-                        }
-                        else
-                        {
-                            AddOutputLog($"Not connected to Arduino", LogType.Warning);
-                        }
-                        TXTConsoleIn.Clear();
-                    }
+                    HandleConsoleIn(command);
                 }
             }
             catch (Exception ex)
@@ -902,10 +980,167 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                string data = _arduino.ReadLine();
-                AddOutputLog($"Data received: {data}", LogType.Info);
+                string data = _arduino.ReadLine().Trim().TrimEnd('\r', '\n');
                 // Process data here
+                if (!string.IsNullOrEmpty(data) && data.Length > 0)
+                {
+                    string[] parts;
+                    switch (data[0])
+                    {
+                        case '#':
 
+                            //handle data points for the graph
+                            //----------------------------------------
+                            parts = data.Substring(1).Split('|');
+                            string seriesName;
+                            switch (parts.Length)
+                            {
+                                case 0:
+                                    AddOutputLog($"No data received after #", LogType.Warning);
+                                    return;
+                                case 1:
+                                    AddOutputLog($"Not enough data received after #, it should be: #<seriesname>|<value> or #<seriesname>|<datetime>|<value> or #<seriesname>|<value>|<value>", LogType.Warning);
+                                    return;
+                                case 2:
+                                    //correct format
+                                    seriesName = parts[0];
+                                    if (_chart.Series.FindByName(seriesName) != null)
+                                    {
+                                        if (rbTimeSeries.Checked)
+                                        {
+                                            if (double.TryParse(parts[1], out double value))
+                                            {
+                                                AddTimeSeriesPoint(seriesName, DateTime.Now, value);
+                                            }
+                                            else
+                                            {
+                                                AddOutputLog($"Value is not a valid number: '{parts[1]}'", LogType.Warning);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            AddOutputLog($"Not enough data received after #, it should be: #<seriesname>|<value>|<value>", LogType.Warning);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Received data for unknown series '{seriesName}'", LogType.Warning);
+                                    }
+                                    break;
+                                case 3:
+                                    //correct format
+                                    seriesName = parts[0];
+                                    if (_chart.Series.FindByName(seriesName) != null)
+                                    {
+                                        if (rbTimeSeries.Checked)
+                                        {
+                                            if (DateTime.TryParse(parts[1], out DateTime time) && double.TryParse(parts[2], out double value))
+                                            {
+                                                AddTimeSeriesPoint(seriesName, time, value);
+                                            }
+                                            else
+                                            {
+                                                AddOutputLog($"DateTime is not valid: '{parts[1]}' or Value is not a valid number: '{parts[2]}'", LogType.Warning);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (double.TryParse(parts[1], out double x) && double.TryParse(parts[2], out double y))
+                                            {
+                                                AddXYPoint(seriesName, x, y);
+                                            }
+                                            else
+                                            {
+                                                AddOutputLog($"X is not a valid number: '{parts[1]}' or Y is not a valid number: '{parts[2]}'", LogType.Warning);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Received data for unknown series '{seriesName}'", LogType.Warning);
+                                    }
+                                    break;
+                                default:
+                                    AddOutputLog($"Too much data received after #, it should be: #<seriesname>|<value> or #<seriesname>|<datetime>|<value> or #<seriesname>|<value>|<value>", LogType.Warning);
+                                    return;
+                            }
+
+                            break;
+                        case '!':
+                            //handle reply from commands sent to the arduino
+                            //----------------------------------------
+                            parts = data.Substring(1).Split('|');
+                            if (parts.Length == 3)
+                            {
+                                string? command = parts[0].ToLower();
+                                string? state = parts[1];
+                                string? reply = parts[2];
+                                if (!string.IsNullOrWhiteSpace(state) && state == "success")
+                                {
+                                    AddOutputLog($"Command '{command ?? ""}' executed successfully. Reply: {reply ?? ""}", LogType.Info);
+                                    //Handle specific command reply
+                                    switch (command)
+                                    {
+                                        case "stop":
+                                            // Handle stop command if needed
+                                            break;
+                                        case "start":
+                                            // Handle start command if needed
+                                            break;
+                                        default:
+                                            // Handle other commands if needed
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Reply: {reply ?? ""}", LogType.Warning);
+                                }
+                            }
+                            else
+                            {
+                                AddOutputLog($"Unexpected ! format, it should be: !<command>|<state>|<reply>, we expect the state to be success", LogType.Warning);
+                            }
+                            break;
+                        case '?':
+                            //handle commands comming from the arduino
+                            //----------------------------------------
+                            parts = data.Substring(1).Split('|');
+                            if (parts.Length == 1)
+                            {
+                                string? command = parts[0].ToLower();
+                                if (!string.IsNullOrWhiteSpace(command))
+                                {
+                                    //Handle specific command reply
+                                    switch (command)
+                                    {
+                                        case "stop":
+                                            // Handle stop command if needed
+                                            break;
+                                        case "start":
+                                            // Handle start command if needed
+                                            break;
+                                        default:
+                                            // Handle other commands if needed
+                                            break;
+                                    }
+                                    AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
+                                }
+                                else
+                                {
+                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
+                                }
+                            }
+                            else
+                            {
+                                AddOutputLog($"Unexpected ? format, it should be: ?<command> to be executed", LogType.Warning);
+                            }
+                            break;
+                        default:
+                            AddConsoleOut(data);
+                            break;
+                    }
+                }
 
             }
             catch (Exception ex)
@@ -919,7 +1154,6 @@ namespace ArduinoGraphViewer
         #endregion
 
         #region THREADS
-
 
         private void TWorker()
         {
@@ -976,12 +1210,72 @@ namespace ArduinoGraphViewer
             }
             else
             {
-                TXTOutput.AppendText($"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff")} | {Enum.GetName(typeof(LogType), logType)} | {log}" + Environment.NewLine);
+                // Split current lines
+                var lines = TXTOutput.Lines.ToList();
+
+                // Add new line
+                lines.Add($"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff")} | {Enum.GetName(typeof(LogType), logType)} | {log}");
+
+                // Keep only the last x lines
+                int maxLines = 200;
+                int.TryParse(TXTMaxLines.Text, out maxLines);
+
+                if (lines.Count > maxLines)
+                    lines = lines.Skip(lines.Count - maxLines).ToList();
+
+                // Update textbox
+                TXTOutput.Lines = lines.ToArray();
+
+                // Scroll to bottom
+                if (chAutoScroll.Checked)
+                {
+                    TXTOutput.SelectionStart = TXTOutput.TextLength;
+                    TXTOutput.ScrollToCaret();
+                }
+
             }
         }
 
-        #endregion
+        private void AddConsoleOut(string data, bool dataIn = true)
+        {
+            if (TXTConsoleOut.InvokeRequired)
+            {
+                TXTConsoleOut.Invoke(new Action<string, bool>(AddConsoleOut), data, dataIn);
+            }
+            else
+            {
+                // Split current lines
+                var lines = TXTConsoleOut.Lines.ToList();
 
+                // Add new line
+                StringBuilder sb = new StringBuilder();
+                sb.Append(dataIn ? ">> " : "<< ");
+                if (chAddTimestamp.Checked)
+                    sb.Append($"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff")} | ");
+                sb.Append(data);
+                lines.Add(sb.ToString());
+
+                // Keep only the last x lines
+                int maxLines = 200;
+                int.TryParse(TXTMaxConsoleLines.Text, out maxLines);
+
+                if (lines.Count > maxLines)
+                    lines = lines.Skip(lines.Count - maxLines).ToList();
+
+                // Update textbox
+                TXTConsoleOut.Lines = lines.ToArray();
+
+                // Scroll to bottom
+                if (chAutoScrollConsole.Checked)
+                {
+                    TXTConsoleOut.SelectionStart = TXTConsoleOut.TextLength;
+                    TXTConsoleOut.ScrollToCaret();
+                }
+            }
+        }
+
+
+        #endregion
 
 
     }
