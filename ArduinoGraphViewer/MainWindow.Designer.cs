@@ -124,6 +124,8 @@
             // 
             splitContainer3.BorderStyle = BorderStyle.Fixed3D;
             splitContainer3.Dock = DockStyle.Fill;
+            splitContainer3.FixedPanel = FixedPanel.Panel1;
+            splitContainer3.IsSplitterFixed = true;
             splitContainer3.Location = new Point(0, 0);
             splitContainer3.Name = "splitContainer3";
             splitContainer3.Orientation = Orientation.Horizontal;
@@ -143,7 +145,7 @@
             splitContainer3.Panel2.Controls.Add(TXTConsoleIn);
             splitContainer3.Panel2.Controls.Add(TXTConsoleOut);
             splitContainer3.Size = new Size(269, 652);
-            splitContainer3.SplitterDistance = 122;
+            splitContainer3.SplitterDistance = 88;
             splitContainer3.TabIndex = 0;
             // 
             // gbControl
@@ -154,7 +156,7 @@
             gbControl.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             gbControl.Location = new Point(0, 0);
             gbControl.Name = "gbControl";
-            gbControl.Size = new Size(265, 118);
+            gbControl.Size = new Size(265, 84);
             gbControl.TabIndex = 0;
             gbControl.TabStop = false;
             gbControl.Text = "Control";
@@ -162,7 +164,7 @@
             // BtnStart
             // 
             BtnStart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            BtnStart.Location = new Point(186, 35);
+            BtnStart.Location = new Point(186, 21);
             BtnStart.Name = "BtnStart";
             BtnStart.Size = new Size(73, 55);
             BtnStart.TabIndex = 1;
@@ -172,7 +174,7 @@
             // 
             // BtnStop
             // 
-            BtnStop.Location = new Point(10, 35);
+            BtnStop.Location = new Point(10, 21);
             BtnStop.Name = "BtnStop";
             BtnStop.Size = new Size(73, 55);
             BtnStop.TabIndex = 0;
@@ -236,7 +238,7 @@
             // BtnConsoleSend
             // 
             BtnConsoleSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            BtnConsoleSend.Location = new Point(212, 496);
+            BtnConsoleSend.Location = new Point(212, 530);
             BtnConsoleSend.Name = "BtnConsoleSend";
             BtnConsoleSend.Size = new Size(50, 23);
             BtnConsoleSend.TabIndex = 2;
@@ -247,7 +249,7 @@
             // TXTConsoleIn
             // 
             TXTConsoleIn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            TXTConsoleIn.Location = new Point(3, 496);
+            TXTConsoleIn.Location = new Point(3, 530);
             TXTConsoleIn.Name = "TXTConsoleIn";
             TXTConsoleIn.PlaceholderText = "type 'help' for more info";
             TXTConsoleIn.Size = new Size(202, 23);
@@ -263,7 +265,7 @@
             TXTConsoleOut.PlaceholderText = "ConsoleOut...";
             TXTConsoleOut.ReadOnly = true;
             TXTConsoleOut.ScrollBars = ScrollBars.Both;
-            TXTConsoleOut.Size = new Size(259, 447);
+            TXTConsoleOut.Size = new Size(259, 481);
             TXTConsoleOut.TabIndex = 0;
             TXTConsoleOut.WordWrap = false;
             // 
