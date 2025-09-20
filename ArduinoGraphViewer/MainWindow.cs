@@ -12,15 +12,30 @@ namespace ArduinoGraphViewer
         #region VARS
 
         private string _arduinoCode = @"String inputBuffer = """";
-bool commandInProgress = false;
-bool start = false;
+
+enum State {
+  IDLE,
+  CALIBRATION,
+  MEASURING
+};
+
+State prevState = IDLE;
+State currentState = IDLE;
+
 unsigned long long prevTime;
 unsigned long long currentTime;
+bool blink;
+bool blinkLowToHigh;
+bool blinkHighToLow;
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
   while (!Serial); // Wait for serial connection (optional for Leonardo/Micro)
   Serial.println(""Arduino ready."");
+  Serial.println(""!state|IDLE"");
+  Serial.println(""?clear"");
+  Serial.println(""?add|temp|green"");
 }
 
 void loop() {
@@ -41,33 +56,98 @@ void loop() {
     }
   }
 
-  //process
-  if(start)
-  {
+  //process 
+  switch (currentState) {
+    case IDLE:
+      if (currentState != prevState) 
+      {
+        prevState = currentState;
+        Serial.println(""!state|IDLE"");
+      }
+      // Do nothing or wait for input
+      break;
+
+    case CALIBRATION:
+      if (currentState != prevState) 
+      {
+        prevState = currentState;
+        Serial.println(""!state|CALIBRATION"");
+      }
+      // Run calibration routine
+      calibrate();
+      break;
+
+    case MEASURING:
+      if (currentState != prevState) 
+      {
+        prevState = currentState;
+        Serial.println(""!state|MEASURING"");
+      }
+      // Read sensors
+      measure();
+      break;
+    }
+
+    //Every Second Blink Wave
     if(currentTime-prevTime > 1000000)
     {
+      //To show the program logic is active
+      blink = !blink;
+      if(blink)
+      {
+          blinkLowToHigh = true;
+          digitalWrite(LED_BUILTIN, HIGH );
+      }
+      else
+      {
+          blinkHighToLow = true;
+          digitalWrite(LED_BUILTIN, LOW );
+      }
       //update time
       prevTime = currentTime;
-      float temp = analogRead(A0) * (5.0 / 1023.0) * 100; // Example conversion
-      Serial.println(""#temp|"" + String(temp, 2));
     }  
-  }
+    else
+    {
+      blinkLowToHigh = false;
+      blinkHighToLow = false;
+    }
+  
 }
 
 void handleCommand(String cmd) {
   cmd.trim(); // Remove whitespace
-  Serial.println(""!"" + cmd +""|success|ack"");
   // Command logic
-  if (cmd == ""start"") {
-    Serial.println(""!start|success|started"");
-    start = true;
-  } else if (cmd == ""stop"") {
-        Serial.println(""!stop|success|stopped"");
-        start = false;
-  } else {
-    Serial.println(""!unknown command|fail|not a valid command"");
+  if (cmd == ""calib"") {
+    Serial.println(""!calib|started|success"");
+    currentState = CALIBRATION;
+  } else if (cmd == ""reset"") {
+        Serial.println(""!reset|started|success"");
+        currentState = IDLE;
+  }  else if (cmd == ""measure"") {
+        Serial.println(""!measure|started|success"");
+            currentState = MEASURING;
+  }else {
+    Serial.println(""!unknown command|not a valid command|fail"");
   }
 }
+
+void calibrate()
+{
+  if(blinkLowToHigh)
+  {
+    Serial.println(""still calibrating..."");
+  }
+}
+
+void measure()
+{
+  if(blinkLowToHigh)
+  {
+     float temp = analogRead(A0) * (5.0 / 1023.0) * 100; // Example conversion
+     Serial.println(""#temp|"" + String(temp, 2));
+  }
+}
+
 
 ";
 
@@ -589,7 +669,7 @@ void handleCommand(String cmd) {
                 AddConsoleOut("List of application commands:", true);
                 AddConsoleOut("--------------------------------", true);
                 AddConsoleOut("?ping - replies with ping to check connection", true);
-                AddConsoleOut("?Clear - clears all graph data", true);
+                AddConsoleOut("?clear - clears all graph data", true);
                 AddConsoleOut("?switch|time - switches to Time series mode", true);
                 AddConsoleOut("?switch|xy - switches to XY series mode", true);
                 AddConsoleOut("?remove|<seriesname> - removes the series with the given name", true);

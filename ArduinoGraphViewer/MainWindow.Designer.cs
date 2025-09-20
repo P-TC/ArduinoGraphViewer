@@ -175,16 +175,16 @@
             LblState.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             LblState.Location = new Point(6, 79);
             LblState.Name = "LblState";
-            LblState.Size = new Size(96, 26);
+            LblState.Size = new Size(133, 26);
             LblState.TabIndex = 3;
             LblState.Text = "State";
             // 
             // progressBar
             // 
             progressBar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            progressBar.Location = new Point(105, 80);
+            progressBar.Location = new Point(145, 80);
             progressBar.Name = "progressBar";
-            progressBar.Size = new Size(152, 23);
+            progressBar.Size = new Size(112, 23);
             progressBar.TabIndex = 2;
             // 
             // BtnMeasure
