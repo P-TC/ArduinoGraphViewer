@@ -31,8 +31,9 @@
             splitContainer1 = new SplitContainer();
             splitContainer3 = new SplitContainer();
             gbControl = new GroupBox();
-            BtnStart = new Button();
-            BtnStop = new Button();
+            BtnMeasure = new Button();
+            BtnCalibration = new Button();
+            BtnReset = new Button();
             LblMaxConsoleLines = new Label();
             TXTMaxConsoleLines = new TextBox();
             chAddTimestamp = new CheckBox();
@@ -116,8 +117,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(splitContainer2);
-            splitContainer1.Size = new Size(980, 652);
-            splitContainer1.SplitterDistance = 269;
+            splitContainer1.Size = new Size(976, 648);
+            splitContainer1.SplitterDistance = 267;
             splitContainer1.TabIndex = 0;
             // 
             // splitContainer3
@@ -144,43 +145,55 @@
             splitContainer3.Panel2.Controls.Add(BtnConsoleSend);
             splitContainer3.Panel2.Controls.Add(TXTConsoleIn);
             splitContainer3.Panel2.Controls.Add(TXTConsoleOut);
-            splitContainer3.Size = new Size(269, 652);
+            splitContainer3.Size = new Size(267, 648);
             splitContainer3.SplitterDistance = 88;
             splitContainer3.TabIndex = 0;
             // 
             // gbControl
             // 
-            gbControl.Controls.Add(BtnStart);
-            gbControl.Controls.Add(BtnStop);
+            gbControl.Controls.Add(BtnMeasure);
+            gbControl.Controls.Add(BtnCalibration);
+            gbControl.Controls.Add(BtnReset);
             gbControl.Dock = DockStyle.Fill;
             gbControl.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             gbControl.Location = new Point(0, 0);
             gbControl.Name = "gbControl";
-            gbControl.Size = new Size(265, 84);
+            gbControl.Size = new Size(263, 84);
             gbControl.TabIndex = 0;
             gbControl.TabStop = false;
             gbControl.Text = "Control";
             // 
-            // BtnStart
+            // BtnMeasure
             // 
-            BtnStart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            BtnStart.Location = new Point(186, 21);
-            BtnStart.Name = "BtnStart";
-            BtnStart.Size = new Size(73, 55);
-            BtnStart.TabIndex = 1;
-            BtnStart.Text = "START";
-            BtnStart.UseVisualStyleBackColor = true;
-            BtnStart.Click += BtnStart_Click;
+            BtnMeasure.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            BtnMeasure.Location = new Point(184, 21);
+            BtnMeasure.Name = "BtnMeasure";
+            BtnMeasure.Size = new Size(73, 55);
+            BtnMeasure.TabIndex = 1;
+            BtnMeasure.Text = "MEASURE";
+            BtnMeasure.UseVisualStyleBackColor = true;
+            BtnMeasure.Click += BtnMeasure_Click;
             // 
-            // BtnStop
+            // BtnCalibration
             // 
-            BtnStop.Location = new Point(10, 21);
-            BtnStop.Name = "BtnStop";
-            BtnStop.Size = new Size(73, 55);
-            BtnStop.TabIndex = 0;
-            BtnStop.Text = "STOP";
-            BtnStop.UseVisualStyleBackColor = true;
-            BtnStop.Click += BtnStop_Click;
+            BtnCalibration.Location = new Point(7, 20);
+            BtnCalibration.Name = "BtnCalibration";
+            BtnCalibration.Size = new Size(96, 55);
+            BtnCalibration.TabIndex = 0;
+            BtnCalibration.Text = "CALIBRATION";
+            BtnCalibration.UseVisualStyleBackColor = true;
+            BtnCalibration.Click += BtnCalibration_Click;
+            // 
+            // BtnReset
+            // 
+            BtnReset.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            BtnReset.Location = new Point(105, 20);
+            BtnReset.Name = "BtnReset";
+            BtnReset.Size = new Size(73, 55);
+            BtnReset.TabIndex = 0;
+            BtnReset.Text = "RESET";
+            BtnReset.UseVisualStyleBackColor = true;
+            BtnReset.Click += BtnReset_Click;
             // 
             // LblMaxConsoleLines
             // 
@@ -227,7 +240,7 @@
             // BtnClearConsoleOut
             // 
             BtnClearConsoleOut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            BtnClearConsoleOut.Location = new Point(212, 3);
+            BtnClearConsoleOut.Location = new Point(210, 3);
             BtnClearConsoleOut.Name = "BtnClearConsoleOut";
             BtnClearConsoleOut.Size = new Size(50, 34);
             BtnClearConsoleOut.TabIndex = 0;
@@ -238,7 +251,7 @@
             // BtnConsoleSend
             // 
             BtnConsoleSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            BtnConsoleSend.Location = new Point(212, 530);
+            BtnConsoleSend.Location = new Point(210, 522);
             BtnConsoleSend.Name = "BtnConsoleSend";
             BtnConsoleSend.Size = new Size(50, 23);
             BtnConsoleSend.TabIndex = 2;
@@ -249,10 +262,10 @@
             // TXTConsoleIn
             // 
             TXTConsoleIn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            TXTConsoleIn.Location = new Point(3, 530);
+            TXTConsoleIn.Location = new Point(3, 522);
             TXTConsoleIn.Name = "TXTConsoleIn";
             TXTConsoleIn.PlaceholderText = "type 'help' for more info";
-            TXTConsoleIn.Size = new Size(202, 23);
+            TXTConsoleIn.Size = new Size(200, 23);
             TXTConsoleIn.TabIndex = 1;
             TXTConsoleIn.KeyDown += TXTConsoleIn_KeyDown;
             // 
@@ -265,7 +278,7 @@
             TXTConsoleOut.PlaceholderText = "ConsoleOut...";
             TXTConsoleOut.ReadOnly = true;
             TXTConsoleOut.ScrollBars = ScrollBars.Both;
-            TXTConsoleOut.Size = new Size(259, 481);
+            TXTConsoleOut.Size = new Size(257, 474);
             TXTConsoleOut.TabIndex = 0;
             TXTConsoleOut.WordWrap = false;
             // 
@@ -284,8 +297,8 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(_dgv);
-            splitContainer2.Size = new Size(707, 652);
-            splitContainer2.SplitterDistance = 353;
+            splitContainer2.Size = new Size(705, 648);
+            splitContainer2.SplitterDistance = 350;
             splitContainer2.TabIndex = 0;
             // 
             // _chart
@@ -293,7 +306,7 @@
             _chart.Dock = DockStyle.Fill;
             _chart.Location = new Point(0, 0);
             _chart.Name = "_chart";
-            _chart.Size = new Size(703, 349);
+            _chart.Size = new Size(701, 346);
             _chart.TabIndex = 0;
             _chart.Text = "chart1";
             // 
@@ -308,7 +321,8 @@
             _dgv.Dock = DockStyle.Fill;
             _dgv.Location = new Point(0, 0);
             _dgv.Name = "_dgv";
-            _dgv.Size = new Size(703, 291);
+            _dgv.RowHeadersWidth = 72;
+            _dgv.Size = new Size(701, 290);
             _dgv.TabIndex = 0;
             // 
             // splitContainer4
@@ -330,7 +344,7 @@
             splitContainer4.Panel2.Controls.Add(splitContainer6);
             splitContainer4.Panel2.Controls.Add(statusStrip);
             splitContainer4.Size = new Size(1065, 828);
-            splitContainer4.SplitterDistance = 676;
+            splitContainer4.SplitterDistance = 672;
             splitContainer4.TabIndex = 1;
             // 
             // splitContainer5
@@ -352,8 +366,8 @@
             splitContainer5.Panel2.Controls.Add(BtnRemoveGraph);
             splitContainer5.Panel2.Controls.Add(BtnClear);
             splitContainer5.Panel2.Controls.Add(BtnAddGraph);
-            splitContainer5.Size = new Size(1065, 652);
-            splitContainer5.SplitterDistance = 980;
+            splitContainer5.Size = new Size(1065, 648);
+            splitContainer5.SplitterDistance = 976;
             splitContainer5.TabIndex = 2;
             // 
             // gbGraphType
@@ -395,9 +409,9 @@
             // BtnRemoveGraph
             // 
             BtnRemoveGraph.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            BtnRemoveGraph.Location = new Point(3, 590);
+            BtnRemoveGraph.Location = new Point(3, 586);
             BtnRemoveGraph.Name = "BtnRemoveGraph";
-            BtnRemoveGraph.Size = new Size(73, 55);
+            BtnRemoveGraph.Size = new Size(74, 55);
             BtnRemoveGraph.TabIndex = 0;
             BtnRemoveGraph.Text = "Remove Graph...";
             BtnRemoveGraph.UseVisualStyleBackColor = true;
@@ -408,7 +422,7 @@
             BtnClear.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             BtnClear.Location = new Point(3, 60);
             BtnClear.Name = "BtnClear";
-            BtnClear.Size = new Size(73, 55);
+            BtnClear.Size = new Size(74, 55);
             BtnClear.TabIndex = 0;
             BtnClear.Text = "Clear...";
             BtnClear.UseVisualStyleBackColor = true;
@@ -419,7 +433,7 @@
             BtnAddGraph.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             BtnAddGraph.Location = new Point(3, 3);
             BtnAddGraph.Name = "BtnAddGraph";
-            BtnAddGraph.Size = new Size(73, 55);
+            BtnAddGraph.Size = new Size(74, 55);
             BtnAddGraph.TabIndex = 0;
             BtnAddGraph.Text = "Add Graph...";
             BtnAddGraph.UseVisualStyleBackColor = true;
@@ -427,6 +441,7 @@
             // 
             // menuStrip1
             // 
+            menuStrip1.ImageScalingSize = new Size(28, 28);
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, arduinoToolStripMenuItem, aboutToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
@@ -514,8 +529,8 @@
             splitContainer6.Panel2.Controls.Add(TXTMaxLines);
             splitContainer6.Panel2.Controls.Add(chAutoScroll);
             splitContainer6.Panel2.Controls.Add(BtnClearOutput);
-            splitContainer6.Size = new Size(1065, 126);
-            splitContainer6.SplitterDistance = 980;
+            splitContainer6.Size = new Size(1065, 130);
+            splitContainer6.SplitterDistance = 976;
             splitContainer6.TabIndex = 2;
             // 
             // TXTOutput
@@ -527,7 +542,7 @@
             TXTOutput.PlaceholderText = "Application Output...";
             TXTOutput.ReadOnly = true;
             TXTOutput.ScrollBars = ScrollBars.Vertical;
-            TXTOutput.Size = new Size(976, 122);
+            TXTOutput.Size = new Size(972, 126);
             TXTOutput.TabIndex = 1;
             // 
             // LblMaxLines
@@ -572,8 +587,9 @@
             // 
             // statusStrip
             // 
+            statusStrip.ImageScalingSize = new Size(28, 28);
             statusStrip.Items.AddRange(new ToolStripItem[] { tsslStatus });
-            statusStrip.Location = new Point(0, 126);
+            statusStrip.Location = new Point(0, 130);
             statusStrip.Name = "statusStrip";
             statusStrip.Size = new Size(1065, 22);
             statusStrip.TabIndex = 0;
@@ -586,6 +602,7 @@
             // 
             // MainWindow
             // 
+            AcceptButton = BtnMeasure;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1065, 828);
@@ -654,8 +671,8 @@
         private ToolStripMenuItem disconnectToolStripMenuItem;
         private Button BtnConsoleSend;
         private TextBox TXTConsoleIn;
-        private Button BtnStart;
-        private Button BtnStop;
+        private Button BtnMeasure;
+        private Button BtnReset;
         private System.Windows.Forms.DataVisualization.Charting.Chart _chart;
         private ToolStripMenuItem aboutToolStripMenuItem;
         private ToolStripMenuItem helpToolStripMenuItem;
@@ -678,5 +695,6 @@
         private CheckBox chAutoScrollConsole;
         private Button BtnClearConsoleOut;
         private CheckBox chAddTimestamp;
+        private Button BtnCalibration;
     }
 }

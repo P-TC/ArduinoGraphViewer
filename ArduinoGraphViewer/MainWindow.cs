@@ -105,6 +105,158 @@ namespace ArduinoGraphViewer
 
         #region GRAPH
 
+        private bool AddGraph(string SeriesName, Color SeriesColor)
+        {
+            try
+            {
+                if (_chart.Series.FindByName(SeriesName) == null)
+                {
+                    Series series = _chart.Series.Add(SeriesName);
+
+                    series.Color = SeriesColor;
+                    series.ChartType = SeriesChartType.Line;
+                    series.MarkerStyle = MarkerStyle.Circle;
+                    series.MarkerSize = 6;
+                    series.MarkerColor = series.Color;
+                    series.Enabled = true;
+
+                    series.ToolTip = "Value: #VAL at #VALX";
+
+                    if (rbTimeSeries.Checked)
+                    {
+                        if (_dgv.Columns[series.Name + "_Time"] == null)
+                        {
+                            _dgv.Columns.Add(series.Name + "_Time", series.Name + "_Time");
+                            _dgv.Columns[series.Name + "_Time"].Width = 150;
+                            _dgv.Columns[series.Name + "_Time"].SortMode = DataGridViewColumnSortMode.NotSortable;
+                            _dgv.Columns[series.Name + "_Time"].DefaultCellStyle.BackColor = series.Color;
+                        }
+                        if (_dgv.Columns[series.Name] == null)
+                        {
+                            _dgv.Columns.Add(series.Name, series.Name);
+                            _dgv.Columns[series.Name].Width = 80;
+                            _dgv.Columns[series.Name].SortMode = DataGridViewColumnSortMode.NotSortable;
+                            _dgv.Columns[series.Name].DefaultCellStyle.BackColor = series.Color;
+                        }
+
+                        series.XValueType = ChartValueType.DateTime;
+                        series.YValueType = ChartValueType.Single;
+
+                        //Example data
+                        //AddTimeSeriesPoint(series.Name, DateTime.Now, 10);
+                        //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(1), 30);
+                        //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(3), 20);
+                        //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(8), 50);
+                    }
+                    else
+                    {
+                        if (_dgv.Columns[series.Name + "_X"] == null)
+                        {
+                            _dgv.Columns.Add(series.Name + "_X", series.Name + "_X");
+                            _dgv.Columns[series.Name + "_X"].Width = 80;
+                            _dgv.Columns[series.Name + "_X"].SortMode = DataGridViewColumnSortMode.NotSortable;
+                            _dgv.Columns[series.Name + "_X"].DefaultCellStyle.BackColor = series.Color;
+                        }
+                        if (_dgv.Columns[series.Name + "_Y"] == null)
+                        {
+                            _dgv.Columns.Add(series.Name + "_Y", series.Name + "_Y");
+                            _dgv.Columns[series.Name + "_Y"].Width = 80;
+                            _dgv.Columns[series.Name + "_Y"].SortMode = DataGridViewColumnSortMode.NotSortable;
+                            _dgv.Columns[series.Name + "_Y"].DefaultCellStyle.BackColor = series.Color;
+                        }
+
+                        series.XValueType = ChartValueType.Single;
+                        series.YValueType = ChartValueType.Single;
+
+                        //Example data
+                        //AddXYPoint(series.Name, 10, 10);
+                        //AddXYPoint(series.Name, 20, 30);
+                        //AddXYPoint(series.Name, 15, 80);
+                        //AddXYPoint(series.Name, 10, 50);
+                    }
+
+
+                    // Add graph to UI here
+                    AddOutputLog($"Graph '{SeriesName}' added", LogType.Info);
+                    return true;
+                }
+                else
+                {
+                    AddOutputLog($"Graph '{SeriesName}' already exists", LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+            return false;
+        }
+
+        private bool RemoveGraph(string SeriesName)
+        {
+            try
+            {
+                var series = _chart.Series.FindByName(SeriesName);
+                if (series != null)
+                {
+                    _chart.Series.Remove(series);
+                    if (_dgv.Columns[series.Name] != null)
+                        _dgv.Columns.Remove(series.Name);
+                    if (_dgv.Columns[series.Name + "_Time"] != null)
+                        _dgv.Columns.Remove(series.Name + "_Time");
+                    if (_dgv.Columns[series.Name + "_X"] != null)
+                        _dgv.Columns.Remove(series.Name + "_X");
+                    if (_dgv.Columns[series.Name + "_Y"] != null)
+                        _dgv.Columns.Remove(series.Name + "_Y");
+                    AddOutputLog($"Graph '{SeriesName}' removed", LogType.Info);
+                    return true;
+                }
+                else
+                {
+                    AddOutputLog($"Graph '{SeriesName}' not found", LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+            return false;
+        }
+
+        private bool ClearGraphs()
+        {
+            try
+            {
+                foreach (var series in _chart.Series)
+                {
+                    series.Points.Clear();
+                }
+                _dgv.Rows.Clear();
+                if (rbTimeSeries.Checked)
+                {
+                    _latestTime = DateTime.MinValue;
+                    _earliestTime = DateTime.MinValue;
+                }
+                else
+                {
+                    _minX = double.MinValue;
+                    _maxX = double.MinValue;
+                    _minY = double.MinValue;
+                    _maxY = double.MinValue;
+                }
+                AddOutputLog($"Graph cleared", LogType.Info);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+            return false;
+        }
+
+
+
+
         private int FindInsertIndex(DataPointCollection points, double xValue)
         {
             try
@@ -598,40 +750,130 @@ void handleCommand(String cmd) {
                             }
                             break;
                         case '?':
+
                             //handle commands comming from the arduino
                             //----------------------------------------
                             parts = data.Substring(1).Split('|');
-                            if (parts.Length == 1)
+                            switch (parts.Length)
                             {
-                                string? command = parts[0].ToLower();
-                                if (!string.IsNullOrWhiteSpace(command))
-                                {
-                                    //Handle specific command reply
-                                    switch (command)
+                                case 0:
+                                    AddOutputLog($"No command received after ?", LogType.Warning);
+                                    break;
+                                case 1:
+                                    string? command = parts[0].ToLower();
+                                    if (!string.IsNullOrWhiteSpace(command))
                                     {
-                                        case "stop":
-                                            // Handle stop command if needed
-                                            break;
-                                        case "start":
-                                            // Handle start command if needed
-                                            break;
-                                        default:
-                                            // Handle other commands if needed
-                                            break;
+                                        switch (command)
+                                        {
+                                            case "clear":
+                                                BtnClear.Invoke(new Action(() => { ClearGraphs(); }));
+                                                break;
+                                            case "calib":
+                                                BtnCalibration.Invoke(new Action(() => { BtnCalibration_Click(null, null); }));
+                                                break;
+                                            case "reset":
+                                                BtnReset.Invoke(new Action(() => { BtnReset_Click(null, null); }));
+                                                break;
+                                            case "measure":
+                                                BtnMeasure.Invoke(new Action(() => { BtnMeasure_Click(null, null); }));
+                                                break;
+                                            default:
+                                                AddOutputLog($"Unkown command '{command ?? ""}'!", LogType.Warning);
+                                                break;
+                                        }
+                                        AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
                                     }
-                                    AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
-                                }
-                                else
-                                {
-                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
-                                }
-                            }
-                            else
-                            {
-                                AddOutputLog($"Unexpected ? format, it should be: ?<command> to be executed", LogType.Warning);
+                                    else
+                                    {
+                                        AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
+                                    }
+                                    break;
+                                case 2:
+                                    command = parts[0].ToLower();
+                                    string? param1 = parts[1];
+                                    if (!string.IsNullOrWhiteSpace(command))
+                                    {
+                                        switch (command)
+                                        {
+                                            case "switch":
+                                                param1 = param1?.ToLower();
+                                                if (string.IsNullOrWhiteSpace(param1))
+                                                {
+                                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Param1 (time or xy) is required!", LogType.Warning);
+                                                    break;
+                                                }
+                                                rbTimeSeries.Invoke(new Action(() =>
+                                                {
+                                                    switch (param1)
+                                                    {
+                                                        case "time":
+                                                            if (!rbTimeSeries.Checked)
+                                                                rbTimeSeries.Checked = true;
+                                                            break;
+                                                        case "xy":
+                                                            if (!rbXy.Checked)
+                                                                rbXy.Checked = true;
+                                                            break;
+                                                        default:
+                                                            AddOutputLog($"Command '{command ?? ""}' execution failed. Param1 (time or xy) is invalid!", LogType.Warning);
+                                                            break;
+                                                    }
+                                                }));
+                                                break;
+                                            case "remove":
+                                                if (string.IsNullOrWhiteSpace(param1))
+                                                {
+                                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Param1 (series name) is required!", LogType.Warning);
+                                                    break;
+                                                }
+                                                BtnRemoveGraph.Invoke(new Action(() => { RemoveGraph(param1); }));
+                                                break;
+                                            default:
+                                                AddOutputLog($"Unkown command '{command ?? ""}'!", LogType.Warning);
+                                                break;
+                                        }
+                                        AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
+                                    }
+                                    break;
+                                case 3:
+                                    command = parts[0].ToLower();
+                                    param1 = parts[1];
+                                    string? param2 = parts[2];
+                                    if (!string.IsNullOrWhiteSpace(command))
+                                    {
+                                        switch (command)
+                                        {
+                                            case "add":
+                                                if (string.IsNullOrWhiteSpace(param1))
+                                                {
+                                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Param1 (series name) is required!", LogType.Warning);
+                                                    break;
+                                                }
+                                                Color color = Enum.Equals(param2, null) || string.IsNullOrWhiteSpace(param2) ? Color.Black : Color.FromName(param2);
+                                                BtnAddGraph.Invoke(new Action(() => { AddGraph(param1, color); }));
+                                                break;
+                                            default:
+                                                AddOutputLog($"Unkown command '{command ?? ""}'!", LogType.Warning);
+                                                break;
+                                        }
+                                        AddOutputLog($"Command '{command ?? ""}' executed!", LogType.Info);
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Command '{command ?? ""}' execution failed. Unkown command type!", LogType.Warning);
+                                    }
+                                    break;
+                                default:
+                                    AddOutputLog($"Unexpected ? format, it should be: ?<command>|param1|param2 to be executed - params are only needed for some commands!", LogType.Warning);
+                                    break;
                             }
                             break;
                         default:
+                            //regular console output
                             AddConsoleOut(data);
                             break;
                     }
@@ -760,13 +1002,13 @@ void handleCommand(String cmd) {
         #region BUTTONS
 
         #region CONTROL
-        private void BtnStop_Click(object sender, EventArgs e)
+        private void BtnCalibration_Click(object sender, EventArgs e)
         {
             try
             {
                 if (_arduino != null && _arduino.IsOpen)
                 {
-                    _arduino.WriteLine($"stop");
+                    _arduino.WriteLine($"calib");
                     AddOutputLog($"Disconnected from Arduino", LogType.Info);
                 }
                 else
@@ -780,13 +1022,33 @@ void handleCommand(String cmd) {
             }
         }
 
-        private void BtnStart_Click(object sender, EventArgs e)
+        private void BtnReset_Click(object sender, EventArgs e)
         {
             try
             {
                 if (_arduino != null && _arduino.IsOpen)
                 {
-                    _arduino.WriteLine($"start");
+                    _arduino.WriteLine($"reset");
+                    AddOutputLog($"Disconnected from Arduino", LogType.Info);
+                }
+                else
+                {
+                    AddOutputLog($"Not connected to Arduino", LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+        }
+
+        private void BtnMeasure_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_arduino != null && _arduino.IsOpen)
+                {
+                    _arduino.WriteLine($"measure");
                     AddOutputLog($"Disconnected from Arduino", LogType.Info);
                 }
                 else
@@ -841,81 +1103,7 @@ void handleCommand(String cmd) {
                 {
                     if (addSeries.ShowDialog() == DialogResult.OK)
                     {
-                        if (_chart.Series.FindByName(addSeries.SeriesName) == null)
-                        {
-                            Series series = _chart.Series.Add(addSeries.SeriesName);
-
-                            series.Color = addSeries.SeriesColor;
-                            series.ChartType = SeriesChartType.Line;
-                            series.MarkerStyle = MarkerStyle.Circle;
-                            series.MarkerSize = 6;
-                            series.MarkerColor = series.Color;
-                            series.Enabled = true;
-
-                            series.ToolTip = "Value: #VAL at #VALX";
-
-                            if (rbTimeSeries.Checked)
-                            {
-                                if (_dgv.Columns[series.Name + "_Time"] == null)
-                                {
-                                    _dgv.Columns.Add(series.Name + "_Time", series.Name + "_Time");
-                                    _dgv.Columns[series.Name + "_Time"].Width = 150;
-                                    _dgv.Columns[series.Name + "_Time"].SortMode = DataGridViewColumnSortMode.NotSortable;
-                                    _dgv.Columns[series.Name + "_Time"].DefaultCellStyle.BackColor = series.Color;
-                                }
-                                if (_dgv.Columns[series.Name] == null)
-                                {
-                                    _dgv.Columns.Add(series.Name, series.Name);
-                                    _dgv.Columns[series.Name].Width = 80;
-                                    _dgv.Columns[series.Name].SortMode = DataGridViewColumnSortMode.NotSortable;
-                                    _dgv.Columns[series.Name].DefaultCellStyle.BackColor = series.Color;
-                                }
-
-                                series.XValueType = ChartValueType.DateTime;
-                                series.YValueType = ChartValueType.Single;
-
-                                //Example data
-                                //AddTimeSeriesPoint(series.Name, DateTime.Now, 10);
-                                //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(1), 30);
-                                //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(3), 20);
-                                //AddTimeSeriesPoint(series.Name, DateTime.Now.AddSeconds(8), 50);
-                            }
-                            else
-                            {
-                                if (_dgv.Columns[series.Name + "_X"] == null)
-                                {
-                                    _dgv.Columns.Add(series.Name + "_X", series.Name + "_X");
-                                    _dgv.Columns[series.Name + "_X"].Width = 80;
-                                    _dgv.Columns[series.Name + "_X"].SortMode = DataGridViewColumnSortMode.NotSortable;
-                                    _dgv.Columns[series.Name + "_X"].DefaultCellStyle.BackColor = series.Color;
-                                }
-                                if (_dgv.Columns[series.Name + "_Y"] == null)
-                                {
-                                    _dgv.Columns.Add(series.Name + "_Y", series.Name + "_Y");
-                                    _dgv.Columns[series.Name + "_Y"].Width = 80;
-                                    _dgv.Columns[series.Name + "_Y"].SortMode = DataGridViewColumnSortMode.NotSortable;
-                                    _dgv.Columns[series.Name + "_Y"].DefaultCellStyle.BackColor = series.Color;
-                                }
-
-                                series.XValueType = ChartValueType.Single;
-                                series.YValueType = ChartValueType.Single;
-
-                                //Example data
-                                //AddXYPoint(series.Name, 10, 10);
-                                //AddXYPoint(series.Name, 20, 30);
-                                //AddXYPoint(series.Name, 15, 80);
-                                //AddXYPoint(series.Name, 10, 50);
-                            }
-
-
-                            // Add graph to UI here
-                            AddOutputLog($"Graph '{addSeries.SeriesName}' added", LogType.Info);
-                        }
-                        else
-                        {
-                            AddOutputLog($"Graph '{addSeries.SeriesName}' already exists", LogType.Warning);
-                        }
-
+                        AddGraph(addSeries.SeriesName, addSeries.SeriesColor);
                     }
                 }
 
@@ -932,24 +1120,7 @@ void handleCommand(String cmd) {
             {
                 if (MessageBox.Show("Are you sure you want to clear all data from the graph?", "Clear graph", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    foreach (var series in _chart.Series)
-                    {
-                        series.Points.Clear();
-                    }
-                    _dgv.Rows.Clear();
-                    if (rbTimeSeries.Checked)
-                    {
-                        _latestTime = DateTime.MinValue;
-                        _earliestTime = DateTime.MinValue;
-                    }
-                    else
-                    {
-                        _minX = double.MinValue;
-                        _maxX = double.MinValue;
-                        _minY = double.MinValue;
-                        _maxY = double.MinValue;
-                    }
-                    AddOutputLog($"Graph cleared", LogType.Info);
+                    ClearGraphs();
                 }
             }
             catch (Exception ex)
@@ -966,24 +1137,7 @@ void handleCommand(String cmd) {
                 {
                     if (removeSeries.ShowDialog() == DialogResult.OK)
                     {
-                        var series = _chart.Series.FindByName(removeSeries.SelectedSeries);
-                        if (series != null)
-                        {
-                            _chart.Series.Remove(series);
-                            if(_dgv.Columns[series.Name] != null)
-                                _dgv.Columns.Remove(series.Name);
-                            if(_dgv.Columns[series.Name + "_Time"] != null)
-                                _dgv.Columns.Remove(series.Name + "_Time");
-                            if(_dgv.Columns[series.Name + "_X"] != null)
-                                _dgv.Columns.Remove(series.Name + "_X");
-                            if(_dgv.Columns[series.Name + "_Y"] != null)
-                                _dgv.Columns.Remove(series.Name + "_Y");
-                            AddOutputLog($"Graph '{removeSeries.SelectedSeries}' removed", LogType.Info);
-                        }
-                        else
-                        {
-                            AddOutputLog($"Graph '{removeSeries.SelectedSeries}' not found", LogType.Warning);
-                        }
+                        RemoveGraph(removeSeries.SelectedSeries);
                     }
                 }
             }
@@ -1383,7 +1537,6 @@ void handleCommand(String cmd) {
 
 
         #endregion
-
 
     }
 }
