@@ -72,6 +72,10 @@ void handleCommand(String cmd) {
 ";
 
 
+        private ArduinoUploader.ArduinoBoardFqbn prevSelectedArduinoBoard = ArduinoUploader.ArduinoBoardFqbn.ArduinoUno;
+        private string prevSelecedCOMPort = "COM3";
+        private int prevSelectedBaudRate = 9600;
+
         private bool _bInitBusy = true;
 
         private StringBuilder _serialBuffer = new StringBuilder();
@@ -1037,8 +1041,12 @@ void handleCommand(String cmd) {
                 if (_arduino == null || !_arduino.IsOpen)
                 {
                     var selector = new ComPortSelectorForm();
+                    selector.SelectedPort = prevSelecedCOMPort;
+                    selector.SelectedBaudRate = prevSelectedBaudRate;
                     if (selector.ShowDialog() == DialogResult.OK)
                     {
+                        prevSelecedCOMPort = selector.SelectedPort;
+                        prevSelectedBaudRate = selector.SelectedBaudRate;
                         _arduino = new SerialPort(selector.SelectedPort, selector.SelectedBaudRate);
                         _arduino.DataReceived += _arduino_DataReceived;
                         _arduino.Open();
@@ -1084,12 +1092,23 @@ void handleCommand(String cmd) {
         {
             try
             {
-                using (ArduinoExampleForm exampleForm = new ArduinoExampleForm(_arduinoCode))
+                using (ArduinoExampleForm exampleForm = new ArduinoExampleForm(_arduinoCode, prevSelecedCOMPort, prevSelectedArduinoBoard))
                 {
+                    if (_arduino != null && _arduino.IsOpen)
+                    {
+                        if (MessageBox.Show("You are currently connected to an Arduino. It is recommended to disconnect before uploading new code. Do you want to disconnect now?", "Disconnect", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            _arduino.Close();
+                            AddOutputLog($"Disconnected from Arduino", LogType.Info);
+                            tsslStatus.Text = "Not connected";
+                        }
+                    }
+                    exampleForm.SelectedCOMPort = prevSelecedCOMPort;
+                    exampleForm.SelectedArduinoBoard = prevSelectedArduinoBoard;
                     if (exampleForm.ShowDialog() == DialogResult.OK)
                     {
-                        Clipboard.SetText(exampleForm.ExampleCode);
-                        AddOutputLog("Example code copied to clipboard", LogType.Info);
+                        prevSelecedCOMPort = exampleForm.SelectedCOMPort;
+                        prevSelectedArduinoBoard = exampleForm.SelectedArduinoBoard;
                     }
                 }
             }

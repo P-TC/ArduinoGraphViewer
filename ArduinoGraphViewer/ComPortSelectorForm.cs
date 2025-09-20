@@ -13,7 +13,17 @@ namespace ArduinoGraphViewer
 {
     public partial class ComPortSelectorForm : Form
     {
-        public string SelectedPort { get; private set; }
+        public string SelectedPort
+        {
+            get
+            {
+                return comboBoxPorts.SelectedItem?.ToString() ?? string.Empty;
+            }
+            set
+            {
+                comboBoxPorts.SelectedItem = value;
+            }
+        }
 
         public int SelectedBaudRate
         {
@@ -21,6 +31,10 @@ namespace ArduinoGraphViewer
             {
                 int.TryParse(comboBoxBaudRates.SelectedItem?.ToString(), out int baud);
                 return baud;
+            }
+            set
+            {
+                comboBoxBaudRates.SelectedItem = value.ToString();
             }
         }
 
@@ -57,7 +71,6 @@ namespace ArduinoGraphViewer
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-            SelectedPort = comboBoxPorts.SelectedItem?.ToString();
             DialogResult = DialogResult.OK;
             Close();
         }

@@ -15,8 +15,33 @@ namespace ArduinoGraphViewer
     {
         #region PROPERTIES
 
-        public ArduinoUploader.ArduinoBoardFqbn SelectedBoard { get; private set; } = ArduinoUploader.ArduinoBoardFqbn.ArduinoNano;
-        public string SelectedPort { get; private set; } = "COM3";
+        private ArduinoUploader.ArduinoBoardFqbn _selectedArduinoBoard = ArduinoUploader.ArduinoBoardFqbn.ArduinoUno;
+        public ArduinoUploader.ArduinoBoardFqbn SelectedArduinoBoard
+        {
+            get
+            {
+                var selected = cbBoard.SelectedItem as ArduinoUploader.ArduinoBoardFqbn?;
+                return selected ?? _selectedArduinoBoard;
+            }
+            set
+            {
+                cbBoard.SelectedItem = value;
+                _selectedArduinoBoard = value;
+            }
+        }
+
+
+        public string SelectedPort
+        {
+            get
+            {
+                return cbCOMPort.SelectedItem?.ToString() ?? string.Empty;
+            }
+            set
+            {
+                cbCOMPort.SelectedItem = value;
+            }
+        }
 
         #endregion
 
@@ -87,8 +112,6 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                SelectedBoard = (ArduinoUploader.ArduinoBoardFqbn)cbBoard.SelectedItem;
-                SelectedPort = cbCOMPort.SelectedItem.ToString();
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

@@ -14,6 +14,7 @@ namespace ArduinoGraphViewer
     {
         #region VARS
 
+        private ArduinoUploader _uploader;
 
         #endregion
 
@@ -53,7 +54,7 @@ namespace ArduinoGraphViewer
                 {
                     string dir = Path.GetDirectoryName(sfd.FileName);
                     string finalFileName = Path.Combine(dir, Path.GetFileNameWithoutExtension(sfd.FileName), Path.GetFileNameWithoutExtension(sfd.FileName) + ".ino");
-                    if(!Directory.Exists(Path.GetDirectoryName(finalFileName)))
+                    if (!Directory.Exists(Path.GetDirectoryName(finalFileName)))
                     {
                         Directory.CreateDirectory(Path.GetDirectoryName(finalFileName)!);
                     }
@@ -74,16 +75,17 @@ namespace ArduinoGraphViewer
             {
                 using (ArduinoBoardSelectorForm boardSelector = new ArduinoBoardSelectorForm())
                 {
+                    boardSelector.SelectedArduinoBoard = SelectedArduinoBoard;
+                    boardSelector.SelectedPort = SelectedCOMPort;
                     if (boardSelector.ShowDialog() == DialogResult.OK)
                     {
-                        if (boardSelector.SelectedBoard != null && boardSelector.SelectedPort != null)
+                        if (boardSelector?.SelectedArduinoBoard != null && boardSelector.SelectedPort != null)
                         {
+                            SelectedArduinoBoard = boardSelector.SelectedArduinoBoard;
+                            SelectedCOMPort = boardSelector.SelectedPort;
                             string output = "";
-                            if (ArduinoUploader.CompileAndUploadSketch(txtExampleCode.Text, boardSelector.SelectedPort, boardSelector.SelectedBoard, out output))
+                            if (_uploader.CompileAndUploadSketch(txtExampleCode.Text, boardSelector.SelectedPort, boardSelector.SelectedArduinoBoard, out output))
                             {
-                                txtOutput.Text = output;
-                                txtOutput.SelectionStart = txtOutput.Text.Length;
-                                txtOutput.ScrollToCaret();
                                 MessageBox.Show("Code uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             else
@@ -120,13 +122,52 @@ namespace ArduinoGraphViewer
             set => txtExampleCode.Text = value;
         }
 
+        public ArduinoUploader.ArduinoBoardFqbn SelectedArduinoBoard
+        {
+            get;
+            set;
+        } = ArduinoUploader.ArduinoBoardFqbn.ArduinoUno;
+        public string SelectedCOMPort
+        {
+            get;
+            set;
+        } = "COM3";
+
+
         #endregion
 
         #region CONSTRUCTORS
-        public ArduinoExampleForm(string? arduinoCode)
+        public ArduinoExampleForm(string? arduinoCode, string prevCOMPort = "COM3", ArduinoUploader.ArduinoBoardFqbn arduinoBoardType = ArduinoUploader.ArduinoBoardFqbn.ArduinoUno)
         {
             InitializeComponent();
+            SelectedCOMPort = prevCOMPort;
+            SelectedArduinoBoard = arduinoBoardType;
             ExampleCode = arduinoCode ?? "";
+            _uploader = new ArduinoUploader();
+            _uploader.UploadProgress += _uploader_UploadProgress;
+        }
+
+        #endregion
+
+        #region EVENTHANDLERS
+
+        private void _uploader_UploadProgress(object? sender, string e)
+        {
+            if (txtOutput.InvokeRequired)
+            {
+                txtOutput.Invoke(new Action(() =>
+                {
+                    txtOutput.AppendText(e + Environment.NewLine);
+                    txtOutput.SelectionStart = txtOutput.Text.Length;
+                    txtOutput.ScrollToCaret();
+                }));
+            }
+            else
+            {
+                txtOutput.AppendText(e + Environment.NewLine);
+                txtOutput.SelectionStart = txtOutput.Text.Length;
+                txtOutput.ScrollToCaret();
+            }
         }
 
         #endregion

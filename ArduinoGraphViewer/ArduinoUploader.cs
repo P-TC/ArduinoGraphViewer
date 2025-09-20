@@ -30,6 +30,7 @@ namespace ArduinoGraphViewer
 
     public class ArduinoUploader
     {
+        #region ENUMS
         public enum ArduinoBoardFqbn
         {
             ArduinoUno,           // arduino:avr:uno
@@ -43,7 +44,25 @@ namespace ArduinoGraphViewer
             ArduinoNano33IoT      // arduino:samd:nano_33_iot
         }
 
-        private static bool IsArduinoCliAvailable()
+        #endregion
+
+        #region EVENTS
+
+        public event EventHandler<string>? UploadProgress;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public ArduinoUploader()
+        {
+            UploadProgress = null;
+        }
+
+        #endregion
+
+        #region PRIVATE METHODS
+        private bool IsArduinoCliAvailable()
         {
             try
             {
@@ -68,7 +87,7 @@ namespace ArduinoGraphViewer
             }
         }
 
-        private static bool IsCoreInstalled(string cliPath, string fqbn, out string outputCLI)
+        private bool IsCoreInstalled(string cliPath, string fqbn, out string outputCLI)
         {
             outputCLI = "";
             try
@@ -87,8 +106,15 @@ namespace ArduinoGraphViewer
                 };
 
                 process.Start();
+                bool exited = process.WaitForExit(10000);
+                if (!exited)
+                {
+                    process.Kill();
+                    outputCLI = "❌ Core check timed out (10s)." + Environment.NewLine;
+                    return false;
+                }
                 string output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
+
 
                 outputCLI = "🔍 Checking installed cores..." + Environment.NewLine;
                 bool result = output.Contains(platform);
@@ -106,7 +132,7 @@ namespace ArduinoGraphViewer
 
         }
 
-        private static bool InstallCore(string cliPath, string fqbn, out string outputCLI)
+        private bool InstallCore(string cliPath, string fqbn, out string outputCLI)
         {
             outputCLI = "";
             try
@@ -128,9 +154,16 @@ namespace ArduinoGraphViewer
                 };
 
                 process.Start();
+                bool exited = process.WaitForExit(60000); // 60 seconds timeout
+                if (!exited)
+                {
+                    process.Kill();
+                    outputCLI = "❌ Core installation timed out (60s)." + Environment.NewLine;
+                    return false;
+                }
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+
 
                 outputBuilder.AppendLine("📦 Core Install Output:");
                 outputBuilder.AppendLine(output);
@@ -157,7 +190,7 @@ namespace ArduinoGraphViewer
 
         }
 
-        private static bool CompileSketch(string cliPath, string sketchPath, string fqbn, out string outputCLI)
+        private bool CompileSketch(string cliPath, string sketchPath, string fqbn, out string outputCLI)
         {
             outputCLI = "";
             try
@@ -179,7 +212,13 @@ namespace ArduinoGraphViewer
                 process.Start();
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+                bool exited = process.WaitForExit(10000);
+                if (!exited)
+                {
+                    process.Kill();
+                    outputCLI = "❌ Compilation timed out (10s)." + Environment.NewLine;
+                    return false;
+                }
 
                 outputBuilder.AppendLine("🛠️ Compile Output:");
                 outputBuilder.AppendLine(output);
@@ -205,7 +244,7 @@ namespace ArduinoGraphViewer
 
         }
 
-        private static bool UploadSketch(string cliPath, string sketchPath, string port, string fqbn, out string outputCLI)
+        private bool UploadSketch(string cliPath, string sketchPath, string port, string fqbn, out string outputCLI)
         {
             outputCLI = "";
             try
@@ -220,9 +259,16 @@ namespace ArduinoGraphViewer
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
+                bool exited = process.WaitForExit(10000);
+                if (!exited)
+                {
+                    process.Kill();
+                    outputCLI = "❌ Upload timed out (10s)." + Environment.NewLine;
+                    return false;
+                }
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+
 
                 outputBuilder.AppendLine("📤 Upload Output:");
                 outputBuilder.AppendLine(output);
@@ -249,14 +295,14 @@ namespace ArduinoGraphViewer
 
         }
 
-        private static string GetPersistentSketchFolder()
+        private string GetPersistentSketchFolder()
         {
             string sketchFolder = Path.Combine(Path.GetTempPath(), "ArduinoSketch");
             Directory.CreateDirectory(sketchFolder);
             return sketchFolder;
         }
 
-        private static string WriteSketchToFile(string code)
+        private string WriteSketchToFile(string code)
         {
             string sketchFolder = GetPersistentSketchFolder();
             string sketchFile = Path.Combine(sketchFolder, "ArduinoSketch.ino");
@@ -264,10 +310,10 @@ namespace ArduinoGraphViewer
             return sketchFolder;
         }
 
+        #endregion
 
-
-
-        public static bool CompileAndUploadSketch(string arduinoCode, string port, ArduinoBoardFqbn fqbn, out string outputCLI)
+        #region PUBLIC METHODS
+        public bool CompileAndUploadSketch(string arduinoCode, string port, ArduinoBoardFqbn fqbn, out string outputCLI)
         {
             outputCLI = "";
             try
@@ -277,41 +323,54 @@ namespace ArduinoGraphViewer
                 string appFolder = AppDomain.CurrentDomain.BaseDirectory;
                 string cliPath = Path.Combine(appFolder, "arduino-cli.exe");
 
+                string tempOutput = "";
                 if (!IsArduinoCliAvailable())
                 {
                     outputBuilder.AppendLine("❌ arduino - cli is not available.Please install it from https://arduino.github.io/arduino-cli/installation/");
                     outputBuilder.AppendLine("https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Windows_64bit.zip");
+                    tempOutput = outputBuilder.ToString();
+                    UploadProgress?.Invoke(this, tempOutput);
+                    outputCLI = tempOutput;
                     return false;
                 }
 
-                string tempOutput = "";
+                tempOutput = "";
                 if (!IsCoreInstalled(cliPath, fqbn.ToFqbnString(), out tempOutput))
                 {
                     outputBuilder.AppendLine(tempOutput);
+                    tempOutput += "🔍 Required core not found. Installing..." + Environment.NewLine;
                     outputBuilder.AppendLine("🔍 Required core not found. Installing...");
+                    UploadProgress?.Invoke(this, tempOutput);
                     tempOutput = "";
                     if (!InstallCore(cliPath, fqbn.ToFqbnString(), out tempOutput))
                     {
                         outputBuilder.AppendLine(tempOutput);
                         outputBuilder.AppendLine("❌ Core installation failed. Upload aborted.");
+                        UploadProgress?.Invoke(this, outputBuilder.ToString());
                         outputCLI = outputBuilder.ToString();
                         return false;
                     }
                     else
                     {
                         outputBuilder.AppendLine(tempOutput);
+                        UploadProgress?.Invoke(this, tempOutput);
                     }
 
                 }
                 else
                 {
                     outputBuilder.AppendLine("✅ Required core already installed.");
+                    UploadProgress?.Invoke(this, outputBuilder.ToString());
                 }
 
+                tempOutput = "";
                 string sketchFolder = WriteSketchToFile(arduinoCode);
                 if (!Directory.Exists(sketchFolder) || !File.Exists(Path.Combine(sketchFolder, "ArduinoSketch.ino")))
                 {
+                    tempOutput += "❌ Failed to create sketch file." + Environment.NewLine;
                     outputBuilder.AppendLine("❌ Failed to write sketch to file.");
+                    UploadProgress?.Invoke(this, tempOutput);
+                    outputCLI = outputBuilder.ToString();
                     return false;
                 }
 
@@ -319,10 +378,13 @@ namespace ArduinoGraphViewer
                 if (CompileSketch(cliPath, sketchFolder, fqbn.ToFqbnString(), out tempOutput))
                 {
                     outputBuilder.AppendLine(tempOutput);
+                    UploadProgress?.Invoke(this, tempOutput);
                 }
                 else
                 {
                     outputBuilder.AppendLine(tempOutput);
+                    UploadProgress?.Invoke(this, tempOutput);
+                    outputCLI = outputBuilder.ToString();
                     return false;
                 }
 
@@ -332,22 +394,26 @@ namespace ArduinoGraphViewer
                 if (UploadSketch(cliPath, sketchFolder, port, fqbn.ToFqbnString(), out tempOutput))
                 {
                     outputBuilder.AppendLine(tempOutput);
+                    UploadProgress?.Invoke(this, tempOutput);
                     outputCLI = outputBuilder.ToString();
                     return true;
                 }
                 else
                 {
                     outputBuilder.AppendLine(tempOutput);
+                    UploadProgress?.Invoke(this, tempOutput);
                     outputCLI = outputBuilder.ToString();
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                outputCLI += $"❌ Upload failed: {ex.Message}" + Environment.NewLine;
-                Console.WriteLine($"❌ Upload failed: {ex.Message}");
+                outputCLI = $"❌ Upload failed: {ex.Message}" + Environment.NewLine;
+                UploadProgress?.Invoke(this, $"❌ Upload failed: {ex.Message}" + Environment.NewLine);
             }
             return false;
         }
+
+        #endregion
     }
 }
