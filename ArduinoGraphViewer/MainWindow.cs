@@ -11,6 +11,67 @@ namespace ArduinoGraphViewer
     {
         #region VARS
 
+        private string _arduinoCode = @"String inputBuffer = """";
+bool commandInProgress = false;
+bool start = false;
+unsigned long long prevTime;
+unsigned long long currentTime;
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial); // Wait for serial connection (optional for Leonardo/Micro)
+  Serial.println(""Arduino ready."");
+}
+
+void loop() {
+  //timer
+  currentTime = micros();
+  
+  // Read incoming characters
+  if(Serial.available() > 0) {
+    char c = Serial.read();
+
+    if (c == '\n' || c == '\r') {
+      if (inputBuffer.length() > 0) {
+        handleCommand(inputBuffer);
+        inputBuffer = """";
+      }
+    } else {
+      inputBuffer += c;
+    }
+  }
+
+  //process
+  if(start)
+  {
+    if(currentTime-prevTime > 1000000)
+    {
+      //update time
+      prevTime = currentTime;
+      float temp = analogRead(A0) * (5.0 / 1023.0) * 100; // Example conversion
+      Serial.println(""#temp|"" + String(temp, 2));
+    }  
+  }
+}
+
+void handleCommand(String cmd) {
+  cmd.trim(); // Remove whitespace
+  Serial.println(""!"" + cmd +""|success|ack"");
+  // Command logic
+  if (cmd == ""start"") {
+    Serial.println(""!start|success|started"");
+    start = true;
+  } else if (cmd == ""stop"") {
+        Serial.println(""!stop|success|stopped"");
+        start = false;
+  } else {
+    Serial.println(""!unknown command|fail|not a valid command"");
+  }
+}
+
+";
+
+
         private bool _bInitBusy = true;
 
         private StringBuilder _serialBuffer = new StringBuilder();
@@ -491,21 +552,45 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                AddConsoleOut("Available commands:", true);
-                AddConsoleOut("-----------------------", true);
+                AddConsoleOut("Available console commands:", true);
+                AddConsoleOut("------------------------------", true);
                 AddConsoleOut(" ", true);
                 AddConsoleOut("help - Show this help message", true);
                 AddConsoleOut("clear - Clear the console output", true);
                 AddConsoleOut("example - outputs an example arduino project", true);
-                AddConsoleOut("<command> - execute a specific command on the Arduino", true);
+                AddConsoleOut("<command> - execute a specific command on the Arduino. Predefined commands are: calib, reset, measure", true);
                 AddConsoleOut(" ", true);
                 AddConsoleOut("Possible replies:", true);
                 AddConsoleOut("-----------------", true);
                 AddConsoleOut("#<seriesname>|<value> - adds a point to an existing Time series matching the seriesname (PC time for timestamp)", true);
                 AddConsoleOut("#<seriesname>|<datetime>|<value> - adds a point to an existing Time series matching the seriesname", true);
                 AddConsoleOut("#<seriesname>|<value>|<value> - adds a point to an existing Value series matching the seriesname", true);
-                AddConsoleOut("!<command>|<state>|<reply> - reply format to be handled by this application", true);
+                AddConsoleOut(" ", true);
+                AddConsoleOut("!<command>|<reply> - reply format to be handled by this application", true);
+                AddConsoleOut("!<command>|<reply>|<state> - reply format to be handled by this application, state == success in case all went well", true);
+                AddConsoleOut(" ", true);
                 AddConsoleOut("?<command> - command to be handled by this application", true);
+                AddConsoleOut("?<command>|param1 - command with 1 param to be handled by this application", true);
+                AddConsoleOut("?<command>|param1|param2 - command with 2 params to be handled by this application", true);
+                AddConsoleOut(" ", true);
+                AddConsoleOut("List of command replies:", true);
+                AddConsoleOut("-----------------------", true);
+                AddConsoleOut("!state|<reply> - updates the state label with the given reply", true);
+                AddConsoleOut("!progress|<0-100> - updates the progress bar with the given value", true);
+                AddConsoleOut(" ", true);
+                AddConsoleOut("!calib|<reply>|<state> - result of the calib command", true);
+                AddConsoleOut("!reset|<reply>|<state> - result of the reset command", true);
+                AddConsoleOut("!measure|<reply>|<state> - result of the measure command", true);
+                AddConsoleOut(" ", true);
+                AddConsoleOut("List of application commands:", true);
+                AddConsoleOut("--------------------------------", true);
+                AddConsoleOut("?ping - replies with ping to check connection", true);
+                AddConsoleOut("?Clear - clears all graph data", true);
+                AddConsoleOut("?switch|time - switches to Time series mode", true);
+                AddConsoleOut("?switch|xy - switches to XY series mode", true);
+                AddConsoleOut("?remove|<seriesname> - removes the series with the given name", true);
+                AddConsoleOut("?add|<seriesname>|<color> - adds a new series with the given name and color (color in hex format or name, e.g. #FF0000 or red)", true);
+                AddConsoleOut(" ", true);
             }
             catch (Exception ex)
             {
@@ -531,67 +616,7 @@ namespace ArduinoGraphViewer
                         case "example":
                             AddConsoleOut("Example Arduino code:", true);
                             AddConsoleOut("---------------------", true);
-                            AddConsoleOut(@"
-
-String inputBuffer = """";
-bool commandInProgress = false;
-bool start = false;
-unsigned long long prevTime;
-unsigned long long currentTime;
-
-void setup() {
-  Serial.begin(9600);
-  while (!Serial); // Wait for serial connection (optional for Leonardo/Micro)
-  Serial.println(""Arduino ready."");
-}
-
-void loop() {
-  //timer
-  currentTime = micros();
-  
-  // Read incoming characters
-  if(Serial.available() > 0) {
-    char c = Serial.read();
-
-    if (c == '\n' || c == '\r') {
-      if (inputBuffer.length() > 0) {
-        handleCommand(inputBuffer);
-        inputBuffer = """";
-      }
-    } else {
-      inputBuffer += c;
-    }
-  }
-
-  //process
-  if(start)
-  {
-    if(currentTime-prevTime > 1000000)
-    {
-      //update time
-      prevTime = currentTime;
-      float temp = analogRead(A0) * (5.0 / 1023.0) * 100; // Example conversion
-      Serial.println(""#temp|"" + String(temp, 2));
-    }  
-  }
-}
-
-void handleCommand(String cmd) {
-  cmd.trim(); // Remove whitespace
-  Serial.println(""!"" + cmd +""|success|ack"");
-  // Command logic
-  if (cmd == ""start"") {
-    Serial.println(""!start|success|started"");
-    start = true;
-  } else if (cmd == ""stop"") {
-        Serial.println(""!stop|success|stopped"");
-        start = false;
-  } else {
-    Serial.println(""!unknown command|fail|not a valid command"");
-  }
-}
-
-", true);
+                            AddConsoleOut(Environment.NewLine + _arduinoCode, true);
                             break;
                         default:
                             if (_arduino != null && _arduino.IsOpen)
@@ -618,6 +643,26 @@ void handleCommand(String cmd) {
                 AddOutputLog($"{ex.Message}", LogType.Error);
             }
 
+        }
+
+        private void Ping()
+        {
+            try
+            {
+                if (_arduino != null && _arduino.IsOpen)
+                {
+                    _arduino.WriteLine($"ping");
+                    AddOutputLog($"\"ping\" send to Arduino", LogType.Info);
+                }
+                else
+                {
+                    AddOutputLog($"Not connected to Arduino", LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
         }
 
         #endregion
@@ -717,36 +762,80 @@ void handleCommand(String cmd) {
                             //handle reply from commands sent to the arduino
                             //----------------------------------------
                             parts = data.Substring(1).Split('|');
-                            if (parts.Length == 3)
+
+                            switch (parts.Length)
                             {
-                                string? command = parts[0].ToLower();
-                                string? state = parts[1];
-                                string? reply = parts[2];
-                                if (!string.IsNullOrWhiteSpace(state) && state == "success")
-                                {
-                                    AddOutputLog($"Command '{command ?? ""}' executed successfully. Reply: {reply ?? ""}", LogType.Info);
-                                    //Handle specific command reply
+                                case 0:
+                                    AddOutputLog($"No command received after !", LogType.Warning);
+                                    break;
+                                case 1:
+                                    string? command = parts[0].ToLower();
+                                    AddOutputLog($"Not enough data received after !, it should be at least: !<command>|<reply>", LogType.Warning);
+                                    break;
+                                case 2:
+                                    command = parts[0].ToLower();
+                                    string? reply = parts[1];
                                     switch (command)
                                     {
-                                        case "stop":
-                                            // Handle stop command if needed
+                                        case "state":
+                                            LblState.Invoke(new Action(() => { LblState.Text = reply; }));
                                             break;
-                                        case "start":
-                                            // Handle start command if needed
+                                        case "progress":
+                                            progressBar.Invoke(new Action(() =>
+                                            {
+                                                if (int.TryParse(reply, out int progress))
+                                                {
+                                                    if (progress >= 0 && progress <= 100)
+                                                    {
+                                                        progressBar.Value = progress;
+                                                    }
+                                                    else
+                                                    {
+                                                        AddOutputLog($"Progress value is out of range (0-100): '{reply ?? ""}'", LogType.Warning);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    AddOutputLog($"Progress is not a valid number: '{reply ?? ""}'", LogType.Warning);
+                                                }
+                                            }));
                                             break;
                                         default:
-                                            // Handle other commands if needed
+                                            AddOutputLog($"Unkown command '{command ?? ""}'!", LogType.Warning);
                                             break;
                                     }
-                                }
-                                else
-                                {
-                                    AddOutputLog($"Command '{command ?? ""}' execution failed. Reply: {reply ?? ""}", LogType.Warning);
-                                }
-                            }
-                            else
-                            {
-                                AddOutputLog($"Unexpected ! format, it should be: !<command>|<state>|<reply>, we expect the state to be success", LogType.Warning);
+                                    break;
+                                case 3:
+                                    command = parts[0].ToLower();
+                                    reply = parts[1];
+                                    string? state = parts[2];
+                                    if (!string.IsNullOrWhiteSpace(state) && state == "success")
+                                    {
+                                        AddOutputLog($"Command '{command ?? ""}' executed successfully with Reply: {reply ?? ""}", LogType.Info);
+                                        //Handle specific command reply
+                                        switch (command)
+                                        {
+                                            case "calib":
+                                                // Handle calib reply if needed
+                                                break;
+                                            case "reset":
+                                                // Handle reset reply if needed
+                                                break;
+                                            case "measure":
+                                            // Handle measure reply if needed
+                                            default:
+                                                // Handle other reply if needed
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        AddOutputLog($"Command '{command ?? ""}' execution failed. Reply: {reply ?? ""}", LogType.Warning);
+                                    }
+                                    break;
+                                default:
+                                    AddOutputLog($"Unexpected ! format, it should be at least: !<command>|<reply> or !<command>|<reply>|<state> where state == \"success\" if everything went well!", LogType.Warning);
+                                    break;
                             }
                             break;
                         case '?':
@@ -769,13 +858,23 @@ void handleCommand(String cmd) {
                                                 BtnClear.Invoke(new Action(() => { ClearGraphs(); }));
                                                 break;
                                             case "calib":
-                                                BtnCalibration.Invoke(new Action(() => { BtnCalibration_Click(null, null); }));
+                                                BtnCalibration.Invoke(new Action(() =>
+                                                { //Do something for calibration
+                                                }));
                                                 break;
                                             case "reset":
-                                                BtnReset.Invoke(new Action(() => { BtnReset_Click(null, null); }));
+                                                BtnReset.Invoke(new Action(() =>
+                                                { //Do something for reset
+
+                                                }));
                                                 break;
                                             case "measure":
-                                                BtnMeasure.Invoke(new Action(() => { BtnMeasure_Click(null, null); }));
+                                                BtnMeasure.Invoke(new Action(() =>
+                                                { //Do something for measure
+                                                }));
+                                                break;
+                                            case "ping":
+                                                this.Invoke(new Action(() => { Ping(); }));
                                                 break;
                                             default:
                                                 AddOutputLog($"Unkown command '{command ?? ""}'!", LogType.Warning);
@@ -980,6 +1079,26 @@ void handleCommand(String cmd) {
             }
         }
 
+
+        private void viewUploadExampleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (ArduinoExampleForm exampleForm = new ArduinoExampleForm(_arduinoCode))
+                {
+                    if (exampleForm.ShowDialog() == DialogResult.OK)
+                    {
+                        Clipboard.SetText(exampleForm.ExampleCode);
+                        AddOutputLog("Example code copied to clipboard", LogType.Info);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+        }
+
         #endregion
 
         #region HELP
@@ -1009,7 +1128,7 @@ void handleCommand(String cmd) {
                 if (_arduino != null && _arduino.IsOpen)
                 {
                     _arduino.WriteLine($"calib");
-                    AddOutputLog($"Disconnected from Arduino", LogType.Info);
+                    AddOutputLog($"\"calib\" send to Arduino", LogType.Info);
                 }
                 else
                 {
@@ -1029,7 +1148,7 @@ void handleCommand(String cmd) {
                 if (_arduino != null && _arduino.IsOpen)
                 {
                     _arduino.WriteLine($"reset");
-                    AddOutputLog($"Disconnected from Arduino", LogType.Info);
+                    AddOutputLog($"\"reset\" send to Arduino", LogType.Info);
                 }
                 else
                 {
@@ -1049,7 +1168,7 @@ void handleCommand(String cmd) {
                 if (_arduino != null && _arduino.IsOpen)
                 {
                     _arduino.WriteLine($"measure");
-                    AddOutputLog($"Disconnected from Arduino", LogType.Info);
+                    AddOutputLog($"\"measure\" send to Arduino", LogType.Info);
                 }
                 else
                 {
@@ -1537,6 +1656,7 @@ void handleCommand(String cmd) {
 
 
         #endregion
+
 
     }
 }

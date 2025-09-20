@@ -31,6 +31,8 @@
             splitContainer1 = new SplitContainer();
             splitContainer3 = new SplitContainer();
             gbControl = new GroupBox();
+            LblState = new Label();
+            progressBar = new ProgressBar();
             BtnMeasure = new Button();
             BtnCalibration = new Button();
             BtnReset = new Button();
@@ -61,6 +63,8 @@
             arduinoToolStripMenuItem = new ToolStripMenuItem();
             connectToolStripMenuItem = new ToolStripMenuItem();
             disconnectToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripSeparator();
+            viewUploadExampleToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             splitContainer6 = new SplitContainer();
@@ -146,11 +150,13 @@
             splitContainer3.Panel2.Controls.Add(TXTConsoleIn);
             splitContainer3.Panel2.Controls.Add(TXTConsoleOut);
             splitContainer3.Size = new Size(267, 648);
-            splitContainer3.SplitterDistance = 88;
+            splitContainer3.SplitterDistance = 115;
             splitContainer3.TabIndex = 0;
             // 
             // gbControl
             // 
+            gbControl.Controls.Add(LblState);
+            gbControl.Controls.Add(progressBar);
             gbControl.Controls.Add(BtnMeasure);
             gbControl.Controls.Add(BtnCalibration);
             gbControl.Controls.Add(BtnReset);
@@ -158,10 +164,28 @@
             gbControl.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             gbControl.Location = new Point(0, 0);
             gbControl.Name = "gbControl";
-            gbControl.Size = new Size(263, 84);
+            gbControl.Size = new Size(263, 111);
             gbControl.TabIndex = 0;
             gbControl.TabStop = false;
             gbControl.Text = "Control";
+            // 
+            // LblState
+            // 
+            LblState.BorderStyle = BorderStyle.Fixed3D;
+            LblState.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            LblState.Location = new Point(6, 79);
+            LblState.Name = "LblState";
+            LblState.Size = new Size(96, 26);
+            LblState.TabIndex = 3;
+            LblState.Text = "State";
+            // 
+            // progressBar
+            // 
+            progressBar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            progressBar.Location = new Point(105, 80);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new Size(152, 23);
+            progressBar.TabIndex = 2;
             // 
             // BtnMeasure
             // 
@@ -176,7 +200,7 @@
             // 
             // BtnCalibration
             // 
-            BtnCalibration.Location = new Point(7, 20);
+            BtnCalibration.Location = new Point(6, 20);
             BtnCalibration.Name = "BtnCalibration";
             BtnCalibration.Size = new Size(96, 55);
             BtnCalibration.TabIndex = 0;
@@ -251,7 +275,7 @@
             // BtnConsoleSend
             // 
             BtnConsoleSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            BtnConsoleSend.Location = new Point(210, 522);
+            BtnConsoleSend.Location = new Point(210, 495);
             BtnConsoleSend.Name = "BtnConsoleSend";
             BtnConsoleSend.Size = new Size(50, 23);
             BtnConsoleSend.TabIndex = 2;
@@ -262,7 +286,7 @@
             // TXTConsoleIn
             // 
             TXTConsoleIn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            TXTConsoleIn.Location = new Point(3, 522);
+            TXTConsoleIn.Location = new Point(3, 495);
             TXTConsoleIn.Name = "TXTConsoleIn";
             TXTConsoleIn.PlaceholderText = "type 'help' for more info";
             TXTConsoleIn.Size = new Size(200, 23);
@@ -278,7 +302,7 @@
             TXTConsoleOut.PlaceholderText = "ConsoleOut...";
             TXTConsoleOut.ReadOnly = true;
             TXTConsoleOut.ScrollBars = ScrollBars.Both;
-            TXTConsoleOut.Size = new Size(257, 474);
+            TXTConsoleOut.Size = new Size(257, 447);
             TXTConsoleOut.TabIndex = 0;
             TXTConsoleOut.WordWrap = false;
             // 
@@ -477,7 +501,7 @@
             // 
             // arduinoToolStripMenuItem
             // 
-            arduinoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { connectToolStripMenuItem, disconnectToolStripMenuItem });
+            arduinoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { connectToolStripMenuItem, disconnectToolStripMenuItem, toolStripMenuItem2, viewUploadExampleToolStripMenuItem });
             arduinoToolStripMenuItem.Name = "arduinoToolStripMenuItem";
             arduinoToolStripMenuItem.Size = new Size(62, 20);
             arduinoToolStripMenuItem.Text = "&Arduino";
@@ -485,16 +509,28 @@
             // connectToolStripMenuItem
             // 
             connectToolStripMenuItem.Name = "connectToolStripMenuItem";
-            connectToolStripMenuItem.Size = new Size(133, 22);
+            connectToolStripMenuItem.Size = new Size(203, 22);
             connectToolStripMenuItem.Text = "&Connect...";
             connectToolStripMenuItem.Click += connectToolStripMenuItem_Click;
             // 
             // disconnectToolStripMenuItem
             // 
             disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
-            disconnectToolStripMenuItem.Size = new Size(133, 22);
+            disconnectToolStripMenuItem.Size = new Size(203, 22);
             disconnectToolStripMenuItem.Text = "&Disconnect";
             disconnectToolStripMenuItem.Click += disconnectToolStripMenuItem_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(200, 6);
+            // 
+            // viewUploadExampleToolStripMenuItem
+            // 
+            viewUploadExampleToolStripMenuItem.Name = "viewUploadExampleToolStripMenuItem";
+            viewUploadExampleToolStripMenuItem.Size = new Size(203, 22);
+            viewUploadExampleToolStripMenuItem.Text = "&View&&Upload example...";
+            viewUploadExampleToolStripMenuItem.Click += viewUploadExampleToolStripMenuItem_Click;
             // 
             // aboutToolStripMenuItem
             // 
@@ -602,7 +638,6 @@
             // 
             // MainWindow
             // 
-            AcceptButton = BtnMeasure;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1065, 828);
@@ -696,5 +731,9 @@
         private Button BtnClearConsoleOut;
         private CheckBox chAddTimestamp;
         private Button BtnCalibration;
+        private Label LblState;
+        private ProgressBar progressBar;
+        private ToolStripSeparator toolStripMenuItem2;
+        private ToolStripMenuItem viewUploadExampleToolStripMenuItem;
     }
 }
