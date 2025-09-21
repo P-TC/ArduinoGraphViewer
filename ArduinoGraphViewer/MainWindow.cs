@@ -30,12 +30,27 @@ bool blinkHighToLow;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
+
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+
+  
   Serial.begin(9600);
   while (!Serial); // Wait for serial connection (optional for Leonardo/Micro)
   Serial.println(""Arduino ready."");
   Serial.println(""!state|IDLE"");
   Serial.println(""?clear"");
-  Serial.println(""?add|temp|green"");
+  Serial.println(""?switch|xy"");
+  Serial.println(""?add|blue|blue"");
+  Serial.println(""?add|green|green"");
+  Serial.println(""?add|yellow|yellow"");
+  Serial.println(""?add|orange|orange"");
+  Serial.println(""?add|red|red"");
+  Serial.println(""?add|ir|violet"");
 }
 
 void loop() {
@@ -96,7 +111,7 @@ void loop() {
       if(blink)
       {
           blinkLowToHigh = true;
-          digitalWrite(LED_BUILTIN, HIGH );
+          digitalWrite(LED_BUILTIN, HIGH );                    
       }
       else
       {
@@ -139,12 +154,68 @@ void calibrate()
   }
 }
 
+void AllLED_Off()
+{
+    digitalWrite(2, LOW );
+    digitalWrite(3, LOW );
+    digitalWrite(4, LOW );
+    digitalWrite(5, LOW );
+    digitalWrite(6, LOW );
+    digitalWrite(7, LOW );
+}
+
+
 void measure()
 {
   if(blinkLowToHigh)
   {
-     float temp = analogRead(A0) * (5.0 / 1023.0) * 100; // Example conversion
-     Serial.println(""#temp|"" + String(temp, 2));
+     //All LEDs off
+     AllLED_Off();
+
+     //Blue
+     digitalWrite(2, HIGH );
+     delay(50);
+     float rgb = analogRead(A0);
+     Serial.println(""#blue|450|""+ String(rgb, 2));
+     digitalWrite(2, LOW );
+
+     //Green
+     digitalWrite(3, HIGH );
+     delay(50);
+     rgb = analogRead(A0);
+     Serial.println(""#green|495|""+ String(rgb, 2));
+     digitalWrite(3, LOW );
+
+     //Yellow
+     digitalWrite(4, HIGH );
+     delay(50);
+     float yellow = analogRead(A1);
+     Serial.println(""#yellow|570|""+ String(yellow, 2));
+     digitalWrite(4, LOW );
+
+     //Orange
+     digitalWrite(5, HIGH );
+     delay(50);
+     float orange = analogRead(A2);
+     Serial.println(""#orange|590|""+ String(orange, 2));
+     digitalWrite(5, LOW );
+
+     //Red
+     digitalWrite(6, HIGH );
+     delay(50);
+     rgb = analogRead(A0);
+     Serial.println(""#red|620|""+ String(rgb, 2));
+     digitalWrite(6, LOW );
+
+     //IR
+     digitalWrite(7, HIGH );
+     delay(50);
+     float ir = analogRead(A3);
+     Serial.println(""#ir|940|""+ String(ir, 2));
+     digitalWrite(7, LOW );
+
+    currentState = IDLE;
+     
   }
 }
 
@@ -544,6 +615,8 @@ void measure()
                             _maxX = x.Value;
                             bUpdateXRange = true;
                         }
+                        if(_minX == _maxX)
+                            _maxX = _minX + 1;
                         if (bUpdateXRange)
                             UpdateXAxisRange();
 
@@ -558,6 +631,8 @@ void measure()
                             _maxY = y.Value;
                             bUpdateYRange = true;
                         }
+                        if (_minY == _maxY)
+                            _maxY = _minY + 1;
                         if (bUpdateYRange)
                             UpdateYAxisRange();
                     }
@@ -1128,6 +1203,7 @@ void measure()
                         prevSelecedCOMPort = selector.SelectedPort;
                         prevSelectedBaudRate = selector.SelectedBaudRate;
                         _arduino = new SerialPort(selector.SelectedPort, selector.SelectedBaudRate);
+                        _arduino.DtrEnable = true; // to force reboot of the Arduino when connecting
                         _arduino.DataReceived += _arduino_DataReceived;
                         _arduino.Open();
                         AddOutputLog($"Connected to Arduino on {selector.SelectedPort}, with baudrate {selector.SelectedBaudRate}", LogType.Info);
