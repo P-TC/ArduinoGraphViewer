@@ -15,6 +15,7 @@ namespace ArduinoGraphViewer
 
 enum State {
   IDLE,
+  RESET,
   CALIBRATION,
   MEASURING
 };
@@ -27,6 +28,40 @@ unsigned long long currentTime;
 bool blink;
 bool blinkLowToHigh;
 bool blinkHighToLow;
+
+
+float minBlue = 0;
+float maxBlue = 0;
+float scaleBlue = 1;
+float valueBlue = 0;
+
+float minGreen = 0;
+float maxGreen = 0;
+float scaleGreen = 1;
+float valueGreen = 0;
+
+float minYellow = 0;
+float maxYellow = 0;
+float scaleYellow = 1;
+float valueYellow = 0;
+
+float minOrange = 0;
+float maxOrange = 0;
+float scaleOrange = 1;
+float valueOrange = 0;
+
+float minRed = 0;
+float maxRed = 0;
+float scaleRed = 1;
+float valueRed = 0;
+
+float minIR = 0;
+float maxIR = 0;
+float scaleIR = 1;
+float valueIR = 0;
+
+int numberOfMeasurements = 0;
+
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -42,15 +77,8 @@ void setup() {
   Serial.begin(9600);
   while (!Serial); // Wait for serial connection (optional for Leonardo/Micro)
   Serial.println(""Arduino ready."");
-  Serial.println(""!state|IDLE"");
-  Serial.println(""?clear"");
-  Serial.println(""?switch|xy"");
-  Serial.println(""?add|blue|blue"");
-  Serial.println(""?add|green|green"");
-  Serial.println(""?add|yellow|yellow"");
-  Serial.println(""?add|orange|orange"");
-  Serial.println(""?add|red|red"");
-  Serial.println(""?add|ir|violet"");
+  CreateGraphs();
+  currentState = RESET;
 }
 
 void loop() {
@@ -81,7 +109,16 @@ void loop() {
       }
       // Do nothing or wait for input
       break;
-
+    case RESET:
+      if (currentState != prevState) 
+      {
+        prevState = currentState;
+        Serial.println(""!state|RESET"");
+      }
+      // Run reset routine
+      reset();
+      break;
+      break;
     case CALIBRATION:
       if (currentState != prevState) 
       {
@@ -137,7 +174,7 @@ void handleCommand(String cmd) {
     currentState = CALIBRATION;
   } else if (cmd == ""reset"") {
         Serial.println(""!reset|started|success"");
-        currentState = IDLE;
+        currentState = RESET;
   }  else if (cmd == ""measure"") {
         Serial.println(""!measure|started|success"");
             currentState = MEASURING;
@@ -146,12 +183,172 @@ void handleCommand(String cmd) {
   }
 }
 
+void RemoveGraphs()
+{
+  Serial.println(""?remove|blue"");
+  Serial.println(""?remove|green"");
+  Serial.println(""?remove|yellow"");
+  Serial.println(""?remove|orange"");
+  Serial.println(""?remove|red"");
+  Serial.println(""?remove|ir"");
+}
+
+void CreateGraphs()
+{
+  Serial.println(""?switch|xy"");
+  Serial.println(""?add|blue|blue"");
+  Serial.println(""?add|green|green"");
+  Serial.println(""?add|yellow|yellow"");
+  Serial.println(""?add|orange|orange"");
+  Serial.println(""?add|red|red"");
+  Serial.println(""?add|ir|violet"");
+}
+
+void reset()
+{
+  Serial.println(""?clear"");
+  for(int i=0; i< numberOfMeasurements; i++)
+  {
+    Serial.println(""?remove|m""+String(i));
+  }
+  numberOfMeasurements = 0; 
+  currentState = IDLE;
+}
+
 void calibrate()
 {
-  if(blinkLowToHigh)
-  {
-    Serial.println(""still calibrating..."");
-  }
+     //All LEDs off
+     Serial.println(""!progress|0""); 
+     minBlue = 0;
+     maxBlue = 0;
+     scaleBlue = 1;
+     
+     minGreen = 0;
+     maxGreen = 0;
+     scaleGreen = 1;
+     
+     minYellow = 0;
+     maxYellow = 0;
+     scaleYellow = 1;
+      
+     minOrange = 0;
+     maxOrange = 0;
+     scaleOrange = 1;
+      
+     minRed = 0;
+     maxRed = 0;
+     scaleRed = 1;
+      
+     minIR = 0;
+     maxIR = 0;
+     scaleIR = 1;
+     Serial.println(""!progress|7""); 
+
+//---------------------------------
+
+     AllLED_Off();
+
+     Serial.println(""!progress|14""); 
+//---------------------------------
+
+     //Blue
+     delay(175);
+     float rgb = analogRead(A0);
+     minBlue = rgb;
+     Serial.println(""!progress|21""); 
+
+     //Green
+     delay(175);
+     rgb = analogRead(A0);
+     minGreen = rgb;
+     Serial.println(""!progress|28""); 
+     
+     //Yellow
+     delay(175);
+     float yellow = analogRead(A1);
+     minYellow = yellow;
+     Serial.println(""!progress|35""); 
+     
+     //Orange
+     delay(175);
+     float orange = analogRead(A2);
+     minOrange = orange;
+     Serial.println(""!progress|42""); 
+     
+     //Red
+     delay(175);
+     rgb = analogRead(A0);
+     minRed = rgb;
+     Serial.println(""!progress|49"");
+      
+     //IR
+     delay(175);
+     float ir = analogRead(A3);
+     minIR = ir;    
+     Serial.println(""!progress|56""); 
+//---------------------------------
+
+     //Blue
+     digitalWrite(2, HIGH );
+     delay(175);
+     rgb = analogRead(A0);
+     maxBlue = rgb;
+     digitalWrite(2, LOW );
+     Serial.println(""!progress|63""); 
+     
+     //Green
+     digitalWrite(3, HIGH );
+     delay(175);
+     rgb = analogRead(A0);
+     maxGreen = rgb;
+     digitalWrite(3, LOW );
+     Serial.println(""!progress|70""); 
+
+     //Yellow
+     digitalWrite(4, HIGH );
+     delay(175);
+     yellow = analogRead(A1);
+     maxYellow = yellow;
+     digitalWrite(4, LOW );
+     Serial.println(""!progress|77"");
+
+     //Orange
+     digitalWrite(5, HIGH );
+     delay(175);
+     orange = analogRead(A2);
+     maxOrange = orange;
+     digitalWrite(5, LOW );
+     Serial.println(""!progress|84"");
+
+     //Red
+     digitalWrite(6, HIGH );
+     delay(175);
+     rgb = analogRead(A0);
+     maxRed = rgb;
+     digitalWrite(6, LOW );
+     Serial.println(""!progress|91"");
+
+     //IR
+     digitalWrite(7, HIGH );
+     delay(175);
+     ir = analogRead(A3);
+     maxIR = ir;
+     digitalWrite(7, LOW );
+     Serial.println(""!progress|98"");
+
+//---------------------------------
+
+scaleBlue = ((float)1023.0/(float)(maxBlue - minBlue))/(float)1023.0;
+scaleGreen = ((float)1023.0/(float)(maxGreen - minGreen))/(float)1023.0;
+scaleYellow = ((float)1023.0/(float)(maxYellow - minYellow))/(float)1023.0;
+scaleOrange = ((float)1023.0/(float)(maxOrange - minOrange))/(float)1023.0;
+scaleRed = ((float)1023.0/(float)(maxRed - minRed))/(float)1023.0;
+scaleIR = ((float)1023.0/(float)(maxIR - minIR))/(float)1023.0;
+
+     Serial.println(""!progress|100""); 
+//---------------------------------
+
+     currentState = IDLE;
 }
 
 void AllLED_Off()
@@ -167,56 +364,79 @@ void AllLED_Off()
 
 void measure()
 {
-  if(blinkLowToHigh)
-  {
+     Serial.println(""!progress|0""); 
      //All LEDs off
      AllLED_Off();
-
+     Serial.println(""!progress|14""); 
+     
      //Blue
      digitalWrite(2, HIGH );
-     delay(50);
+     delay(175);
      float rgb = analogRead(A0);
-     Serial.println(""#blue|450|""+ String(rgb, 2));
+     valueBlue = rgb*scaleBlue;
+     Serial.println(""#blue|450|""+ String(valueBlue, 3));
      digitalWrite(2, LOW );
-
+     Serial.println(""!progress|28""); 
+     
      //Green
      digitalWrite(3, HIGH );
-     delay(50);
+     delay(175);
      rgb = analogRead(A0);
-     Serial.println(""#green|495|""+ String(rgb, 2));
+     valueGreen = rgb*scaleGreen;
+     Serial.println(""#green|495|""+ String(valueGreen, 3));
      digitalWrite(3, LOW );
-
+     Serial.println(""!progress|42""); 
+     
      //Yellow
      digitalWrite(4, HIGH );
-     delay(50);
+     delay(175);
      float yellow = analogRead(A1);
-     Serial.println(""#yellow|570|""+ String(yellow, 2));
+     valueYellow = yellow*scaleYellow;
+     Serial.println(""#yellow|570|""+ String(valueYellow, 3));
      digitalWrite(4, LOW );
-
+     Serial.println(""!progress|56""); 
+     
      //Orange
      digitalWrite(5, HIGH );
-     delay(50);
+     delay(175);
      float orange = analogRead(A2);
-     Serial.println(""#orange|590|""+ String(orange, 2));
+     valueOrange = orange*scaleOrange;
+     Serial.println(""#orange|590|""+ String(valueOrange, 3));
      digitalWrite(5, LOW );
-
+     Serial.println(""!progress|70""); 
+     
      //Red
      digitalWrite(6, HIGH );
-     delay(50);
+     delay(175);
      rgb = analogRead(A0);
-     Serial.println(""#red|620|""+ String(rgb, 2));
+     valueRed = rgb*scaleRed;
+     Serial.println(""#red|620|""+ String(valueRed, 3));
      digitalWrite(6, LOW );
-
+     Serial.println(""!progress|84""); 
+     
      //IR
      digitalWrite(7, HIGH );
-     delay(50);
+     delay(175);
      float ir = analogRead(A3);
-     Serial.println(""#ir|940|""+ String(ir, 2));
+     valueIR = ir*scaleIR;
+     Serial.println(""#ir|940|""+ String(valueIR, 3));
      digitalWrite(7, LOW );
-
-    currentState = IDLE;
      
-  }
+     
+     //Measurement
+     Serial.println(""?add|m""+String(numberOfMeasurements)+""|gray"");
+     delay(500);
+     Serial.println(""#m""+String(numberOfMeasurements)+""|450|""+ String(valueBlue, 3));
+     Serial.println(""#m""+String(numberOfMeasurements)+""|495|""+ String(valueGreen, 3));
+     Serial.println(""#m""+String(numberOfMeasurements)+""|570|""+ String(valueYellow, 3));
+     Serial.println(""#m""+String(numberOfMeasurements)+""|590|""+ String(valueOrange, 3));
+     Serial.println(""#m""+String(numberOfMeasurements)+""|620|""+ String(valueRed, 3));
+     Serial.println(""#m""+String(numberOfMeasurements)+""|940|""+ String(valueIR, 3));
+     
+     Serial.println(""!progress|100""); 
+     numberOfMeasurements++;
+     currentState = IDLE;
+     
 }
 
 
