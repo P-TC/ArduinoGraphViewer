@@ -65,6 +65,8 @@
             disconnectToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripSeparator();
             viewUploadExampleToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem3 = new ToolStripSeparator();
+            schematicsToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             splitContainer6 = new SplitContainer();
@@ -75,8 +77,6 @@
             BtnClearOutput = new Button();
             statusStrip = new StatusStrip();
             tsslStatus = new ToolStripStatusLabel();
-            toolStripMenuItem3 = new ToolStripSeparator();
-            schematicsToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -534,6 +534,18 @@
             viewUploadExampleToolStripMenuItem.Text = "&View&&Upload example...";
             viewUploadExampleToolStripMenuItem.Click += viewUploadExampleToolStripMenuItem_Click;
             // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(200, 6);
+            // 
+            // schematicsToolStripMenuItem
+            // 
+            schematicsToolStripMenuItem.Name = "schematicsToolStripMenuItem";
+            schematicsToolStripMenuItem.Size = new Size(203, 22);
+            schematicsToolStripMenuItem.Text = "&Get Assets...";
+            schematicsToolStripMenuItem.Click += getAssetsToolStripMenuItem_Click;
+            // 
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { helpToolStripMenuItem });
@@ -544,7 +556,7 @@
             // helpToolStripMenuItem
             // 
             helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            helpToolStripMenuItem.Size = new Size(180, 22);
+            helpToolStripMenuItem.Size = new Size(99, 22);
             helpToolStripMenuItem.Text = "&Help";
             helpToolStripMenuItem.Click += helpToolStripMenuItem_Click;
             // 
@@ -637,18 +649,6 @@
             tsslStatus.Name = "tsslStatus";
             tsslStatus.Size = new Size(48, 17);
             tsslStatus.Text = "Status...";
-            // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(200, 6);
-            // 
-            // schematicsToolStripMenuItem
-            // 
-            schematicsToolStripMenuItem.Name = "schematicsToolStripMenuItem";
-            schematicsToolStripMenuItem.Size = new Size(203, 22);
-            schematicsToolStripMenuItem.Text = "&Schematics";
-            schematicsToolStripMenuItem.Click += schematicsToolStripMenuItem_Click;
             // 
             // MainWindow
             // 

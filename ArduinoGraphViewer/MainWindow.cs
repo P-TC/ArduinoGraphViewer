@@ -1494,11 +1494,11 @@ void measure()
             }
         }
 
-        private void schematicsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void getAssetsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
-                using (FritzingSchematic fs = new FritzingSchematic())
+                using (GetAssetsForm fs = new GetAssetsForm())
                 {
                     fs.ShowDialog();
                 }

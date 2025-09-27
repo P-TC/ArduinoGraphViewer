@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="arduino-cli.exe" />
+    <None Remove="Assets\Asset4\SpectroMeter_INO.png" />
     <None Remove="Assets\FritzingSpectroMeter.png" />
     <None Remove="Assets\FritzingSpectroMeter2.png" />
     <None Remove="Assets\SpectroMeter.fzz" />
@@ -29,9 +30,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\Asset1\FritzingSpectroMeter.png" />
-    <EmbeddedResource Include="Assets\Asset2\FritzingSpectroMeter2.png" />
-    <EmbeddedResource Include="Assets\Asset1\SpectroMeter.fzz" />
-    <EmbeddedResource Include="Assets\Asset2\SpectroMeter2.fzz" />
+    <EmbeddedResource Include="Assets\Asset1\FritzingSpectroMeter.fzz" />
+    <EmbeddedResource Include="Assets\Asset2\SpectroMeter3D_STEP.step" />
+    <EmbeddedResource Include="Assets\Asset2\SpectroMeter3D_STEP.png" />
+    <EmbeddedResource Include="Assets\Asset3\SpectroMeter3D_FUSION360.f3d" />
+    <EmbeddedResource Include="Assets\Asset3\SpectroMeter3D_FUSION360.png" />
+    <EmbeddedResource Include="Assets\Asset4\SpectroMeter_INO.zip" />
+    <EmbeddedResource Include="Assets\Asset4\SpectroMeter_INO.png" />
   </ItemGroup>
 
 </Project>
