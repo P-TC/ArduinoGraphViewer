@@ -118,13 +118,13 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                if (pbSchematic.Image != null)
-                    pbSchematic.Image.Dispose();
+                if (pbAsset.Image != null)
+                    pbAsset.Image.Dispose();
 
                 if (assets[currentAssetID].Picture != null)
                 {
-                    pbSchematic.Image = (Image)assets[currentAssetID].Picture.Clone();
-                    pbSchematic.Invalidate();
+                    pbAsset.Image = (Image)assets[currentAssetID].Picture.Clone();
+                    pbAsset.Invalidate();
                 }
 
                 LblCurrentAssetAndTotal.Text = $"Asset {currentAssetID + 1} of {assets.Count}";
@@ -200,8 +200,8 @@ namespace ArduinoGraphViewer
         {
             try
             {
-                if (pbSchematic.Image != null)
-                    pbSchematic.Image.Dispose();
+                if (pbAsset.Image != null)
+                    pbAsset.Image.Dispose();
                 foreach (var asset in assets)
                 {
                     if (asset.Picture != null)
@@ -210,6 +210,7 @@ namespace ArduinoGraphViewer
                     asset.File = null;
                 }
                 base.Dispose();
+                GC.Collect();
             }
             catch (Exception ex)
             {
@@ -218,8 +219,6 @@ namespace ArduinoGraphViewer
         }
 
         #endregion
-
-
 
     }
 }

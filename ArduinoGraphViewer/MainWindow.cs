@@ -1405,6 +1405,21 @@ void measure()
             }
         }
 
+        private void getAssetsToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                using (GetAssetsForm fs = new GetAssetsForm())
+                {
+                    fs.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+        }
+
         #endregion
 
         #region ARDUINO
@@ -1464,7 +1479,7 @@ void measure()
         }
 
 
-        private void viewUploadExampleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExampleCodeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -1496,17 +1511,7 @@ void measure()
 
         private void getAssetsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                using (GetAssetsForm fs = new GetAssetsForm())
-                {
-                    fs.ShowDialog();
-                }
-            }
-            catch (Exception ex)
-            {
-                AddOutputLog($"{ex.Message}", LogType.Error);
-            }
+
         }
 
         #endregion
@@ -2066,7 +2071,6 @@ void measure()
 
 
         #endregion
-
 
 
     }

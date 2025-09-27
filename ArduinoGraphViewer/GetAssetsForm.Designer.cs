@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             LblFileName = new Label();
-            pbSchematic = new PictureBox();
+            pbAsset = new PictureBox();
             BtnGetFile = new Button();
             BtnNext = new Button();
             BtnPrev = new Button();
             LblCurrentAssetAndTotal = new Label();
-            ((System.ComponentModel.ISupportInitialize)pbSchematic).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pbAsset).BeginInit();
             SuspendLayout();
             // 
             // LblFileName
@@ -49,14 +49,14 @@
             // 
             // pbSchematic
             // 
-            pbSchematic.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            pbSchematic.BorderStyle = BorderStyle.Fixed3D;
-            pbSchematic.Location = new Point(12, 34);
-            pbSchematic.Name = "pbSchematic";
-            pbSchematic.Size = new Size(776, 382);
-            pbSchematic.SizeMode = PictureBoxSizeMode.Zoom;
-            pbSchematic.TabIndex = 1;
-            pbSchematic.TabStop = false;
+            pbAsset.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pbAsset.BorderStyle = BorderStyle.Fixed3D;
+            pbAsset.Location = new Point(12, 34);
+            pbAsset.Name = "pbSchematic";
+            pbAsset.Size = new Size(776, 382);
+            pbAsset.SizeMode = PictureBoxSizeMode.Zoom;
+            pbAsset.TabIndex = 1;
+            pbAsset.TabStop = false;
             // 
             // BtnGetFile
             // 
@@ -112,12 +112,12 @@
             Controls.Add(BtnPrev);
             Controls.Add(BtnNext);
             Controls.Add(BtnGetFile);
-            Controls.Add(pbSchematic);
+            Controls.Add(pbAsset);
             Controls.Add(LblFileName);
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
             Name = "GetAssetsForm";
             Text = "Get assets...";
-            ((System.ComponentModel.ISupportInitialize)pbSchematic).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pbAsset).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -125,7 +125,7 @@
         #endregion
 
         private Label LblFileName;
-        private PictureBox pbSchematic;
+        private PictureBox pbAsset;
         private Button BtnGetFile;
         private Button BtnNext;
         private Button BtnPrev;

@@ -60,13 +60,13 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             saveToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem4 = new ToolStripSeparator();
+            getAssetsToolStripMenuItem = new ToolStripMenuItem();
             arduinoToolStripMenuItem = new ToolStripMenuItem();
             connectToolStripMenuItem = new ToolStripMenuItem();
             disconnectToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripSeparator();
             viewUploadExampleToolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem3 = new ToolStripSeparator();
-            schematicsToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             splitContainer6 = new SplitContainer();
@@ -477,7 +477,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { exitToolStripMenuItem, toolStripMenuItem1, saveToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { exitToolStripMenuItem, toolStripMenuItem1, saveToolStripMenuItem, toolStripMenuItem4, getAssetsToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(37, 20);
             fileToolStripMenuItem.Text = "&File";
@@ -485,25 +485,37 @@
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(171, 22);
+            exitToolStripMenuItem.Size = new Size(180, 22);
             exitToolStripMenuItem.Text = "&Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(168, 6);
+            toolStripMenuItem1.Size = new Size(177, 6);
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(171, 22);
+            saveToolStripMenuItem.Size = new Size(180, 22);
             saveToolStripMenuItem.Text = "&Save data as CSV...";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
+            // toolStripMenuItem4
+            // 
+            toolStripMenuItem4.Name = "toolStripMenuItem4";
+            toolStripMenuItem4.Size = new Size(177, 6);
+            // 
+            // getAssetsToolStripMenuItem
+            // 
+            getAssetsToolStripMenuItem.Name = "getAssetsToolStripMenuItem";
+            getAssetsToolStripMenuItem.Size = new Size(180, 22);
+            getAssetsToolStripMenuItem.Text = "&Get assets...";
+            getAssetsToolStripMenuItem.Click += getAssetsToolStripMenuItem_Click_1;
+            // 
             // arduinoToolStripMenuItem
             // 
-            arduinoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { connectToolStripMenuItem, disconnectToolStripMenuItem, toolStripMenuItem2, viewUploadExampleToolStripMenuItem, toolStripMenuItem3, schematicsToolStripMenuItem });
+            arduinoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { connectToolStripMenuItem, disconnectToolStripMenuItem, toolStripMenuItem2, viewUploadExampleToolStripMenuItem });
             arduinoToolStripMenuItem.Name = "arduinoToolStripMenuItem";
             arduinoToolStripMenuItem.Size = new Size(62, 20);
             arduinoToolStripMenuItem.Text = "&Arduino";
@@ -511,40 +523,28 @@
             // connectToolStripMenuItem
             // 
             connectToolStripMenuItem.Name = "connectToolStripMenuItem";
-            connectToolStripMenuItem.Size = new Size(203, 22);
+            connectToolStripMenuItem.Size = new Size(180, 22);
             connectToolStripMenuItem.Text = "&Connect...";
             connectToolStripMenuItem.Click += connectToolStripMenuItem_Click;
             // 
             // disconnectToolStripMenuItem
             // 
             disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
-            disconnectToolStripMenuItem.Size = new Size(203, 22);
+            disconnectToolStripMenuItem.Size = new Size(180, 22);
             disconnectToolStripMenuItem.Text = "&Disconnect";
             disconnectToolStripMenuItem.Click += disconnectToolStripMenuItem_Click;
             // 
             // toolStripMenuItem2
             // 
             toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new Size(200, 6);
+            toolStripMenuItem2.Size = new Size(177, 6);
             // 
             // viewUploadExampleToolStripMenuItem
             // 
             viewUploadExampleToolStripMenuItem.Name = "viewUploadExampleToolStripMenuItem";
-            viewUploadExampleToolStripMenuItem.Size = new Size(203, 22);
-            viewUploadExampleToolStripMenuItem.Text = "&View&&Upload example...";
-            viewUploadExampleToolStripMenuItem.Click += viewUploadExampleToolStripMenuItem_Click;
-            // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(200, 6);
-            // 
-            // schematicsToolStripMenuItem
-            // 
-            schematicsToolStripMenuItem.Name = "schematicsToolStripMenuItem";
-            schematicsToolStripMenuItem.Size = new Size(203, 22);
-            schematicsToolStripMenuItem.Text = "&Get Assets...";
-            schematicsToolStripMenuItem.Click += getAssetsToolStripMenuItem_Click;
+            viewUploadExampleToolStripMenuItem.Size = new Size(180, 22);
+            viewUploadExampleToolStripMenuItem.Text = "&Example Code...";
+            viewUploadExampleToolStripMenuItem.Click += ExampleCodeToolStripMenuItem_Click;
             // 
             // aboutToolStripMenuItem
             // 
@@ -749,7 +749,7 @@
         private ProgressBar progressBar;
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem viewUploadExampleToolStripMenuItem;
-        private ToolStripSeparator toolStripMenuItem3;
-        private ToolStripMenuItem schematicsToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem4;
+        private ToolStripMenuItem getAssetsToolStripMenuItem;
     }
 }

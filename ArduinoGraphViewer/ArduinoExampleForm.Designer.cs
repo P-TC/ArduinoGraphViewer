@@ -89,7 +89,7 @@
             // uploadToolStripMenuItem
             // 
             uploadToolStripMenuItem.Name = "uploadToolStripMenuItem";
-            uploadToolStripMenuItem.Size = new Size(180, 22);
+            uploadToolStripMenuItem.Size = new Size(121, 22);
             uploadToolStripMenuItem.Text = "&Upload...";
             uploadToolStripMenuItem.Click += uploadToolStripMenuItem_Click;
             // 
@@ -114,7 +114,7 @@
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Name = "ArduinoExampleForm";
-            Text = "ArduinoExampleForm";
+            Text = "Arduino Example Code (View & Upload)";
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
