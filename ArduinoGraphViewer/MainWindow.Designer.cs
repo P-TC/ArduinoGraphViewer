@@ -75,6 +75,8 @@
             BtnClearOutput = new Button();
             statusStrip = new StatusStrip();
             tsslStatus = new ToolStripStatusLabel();
+            toolStripMenuItem3 = new ToolStripSeparator();
+            schematicsToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -501,7 +503,7 @@
             // 
             // arduinoToolStripMenuItem
             // 
-            arduinoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { connectToolStripMenuItem, disconnectToolStripMenuItem, toolStripMenuItem2, viewUploadExampleToolStripMenuItem });
+            arduinoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { connectToolStripMenuItem, disconnectToolStripMenuItem, toolStripMenuItem2, viewUploadExampleToolStripMenuItem, toolStripMenuItem3, schematicsToolStripMenuItem });
             arduinoToolStripMenuItem.Name = "arduinoToolStripMenuItem";
             arduinoToolStripMenuItem.Size = new Size(62, 20);
             arduinoToolStripMenuItem.Text = "&Arduino";
@@ -542,7 +544,7 @@
             // helpToolStripMenuItem
             // 
             helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            helpToolStripMenuItem.Size = new Size(99, 22);
+            helpToolStripMenuItem.Size = new Size(180, 22);
             helpToolStripMenuItem.Text = "&Help";
             helpToolStripMenuItem.Click += helpToolStripMenuItem_Click;
             // 
@@ -635,6 +637,18 @@
             tsslStatus.Name = "tsslStatus";
             tsslStatus.Size = new Size(48, 17);
             tsslStatus.Text = "Status...";
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(200, 6);
+            // 
+            // schematicsToolStripMenuItem
+            // 
+            schematicsToolStripMenuItem.Name = "schematicsToolStripMenuItem";
+            schematicsToolStripMenuItem.Size = new Size(203, 22);
+            schematicsToolStripMenuItem.Text = "&Schematics";
+            schematicsToolStripMenuItem.Click += schematicsToolStripMenuItem_Click;
             // 
             // MainWindow
             // 
@@ -735,5 +749,7 @@
         private ProgressBar progressBar;
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem viewUploadExampleToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem3;
+        private ToolStripMenuItem schematicsToolStripMenuItem;
     }
 }

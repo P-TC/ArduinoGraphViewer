@@ -10,6 +10,10 @@
 
   <ItemGroup>
     <None Remove="arduino-cli.exe" />
+    <None Remove="Assets\FritzingSpectroMeter.png" />
+    <None Remove="Assets\FritzingSpectroMeter2.png" />
+    <None Remove="Assets\SpectroMeter.fzz" />
+    <None Remove="Assets\SpectroMeter2.fzz" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +25,13 @@
     <Content Include="arduino-cli.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Asset1\FritzingSpectroMeter.png" />
+    <EmbeddedResource Include="Assets\Asset2\FritzingSpectroMeter2.png" />
+    <EmbeddedResource Include="Assets\Asset1\SpectroMeter.fzz" />
+    <EmbeddedResource Include="Assets\Asset2\SpectroMeter2.fzz" />
   </ItemGroup>
 
 </Project>

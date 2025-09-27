@@ -835,7 +835,7 @@ void measure()
                             _maxX = x.Value;
                             bUpdateXRange = true;
                         }
-                        if(_minX == _maxX)
+                        if (_minX == _maxX)
                             _maxX = _minX + 1;
                         if (bUpdateXRange)
                             UpdateXAxisRange();
@@ -1494,6 +1494,21 @@ void measure()
             }
         }
 
+        private void schematicsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (FritzingSchematic fs = new FritzingSchematic())
+                {
+                    fs.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                AddOutputLog($"{ex.Message}", LogType.Error);
+            }
+        }
+
         #endregion
 
         #region HELP
@@ -2051,6 +2066,7 @@ void measure()
 
 
         #endregion
+
 
 
     }
