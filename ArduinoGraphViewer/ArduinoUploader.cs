@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static ArduinoGraphViewer.ArduinoUploader;
@@ -68,6 +69,21 @@ namespace ArduinoGraphViewer
             {
                 string appFolder = AppDomain.CurrentDomain.BaseDirectory;
                 string cliPath = Path.Combine(appFolder, "arduino-cli.exe");
+
+                if (!File.Exists(cliPath)) 
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    using (var stream = assembly.GetManifestResourceStream("ArduinoGraphViewer.arduino-cli.exe"))
+                    {
+                        if (stream == null)
+                            throw new FileNotFoundException("Embedded resource not found", "ArduinoGraphViewer.arduino - cli.exe");
+
+                        using (var fileStream = new FileStream(cliPath, FileMode.Create, FileAccess.Write))
+                        {
+                            stream.CopyTo(fileStream);
+                        }
+                    }
+                }
 
 
                 var process = new Process();
